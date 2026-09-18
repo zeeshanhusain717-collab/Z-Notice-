@@ -1,0 +1,1719 @@
+name: Build Zeeshan Notice App APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Step-by-Step Android Build Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      # ==========================================
+      # STEP 1: GitHub Repository & Environment Setup
+      # ==========================================
+      - name: "Robot Step 01: Checkout Code Repository"
+        uses: actions/checkout@v4
+
+      - name: "Robot Step 02: Setup Java OpenJDK 17"
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: "Robot Step 03: Initialize Android SDK Components"
+        run: |
+          set -euo pipefail
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      # ==========================================
+      # STEP 2: Modular Directory Creation
+      # ==========================================
+      - name: "Robot Step 04: Create Root & Source Directories"
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/java/com/zeeshan/notice
+
+      - name: "Robot Step 05: Create Resource & Asset Directories"
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
+          mkdir -p app/src/main/res/mipmap-anydpi-v26
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/menu
+
+      # ==========================================
+      # STEP 3: System Gradle Configuration
+      # ==========================================
+      - name: "Robot Step 06: Configure Gradle Performance Properties"
+        run: |
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
+          android.useAndroidX=true
+          android.nonTransitiveRClass=true
+          org.gradle.daemon=false
+          EOF
+
+      - name: "Robot Step 07: Configure Settings Gradle Project Tree"
+        run: |
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "ZeeshanNotice"
+          include(":app")
+          EOF
+
+      - name: "Robot Step 08: Configure Root Build Script"
+        run: |
+          cat > build.gradle <<'EOF'
+          plugins {
+              id "com.android.application" version "8.2.2" apply false
+              id "org.jetbrains.kotlin.android" version "1.9.22" apply false
+          }
+          EOF
+
+      - name: "Robot Step 09: Download & Link Gradle Wrapper"
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.5"
+
+      # ==========================================
+      # STEP 4: Module Gradle Configuration
+      # ==========================================
+      - name: "Robot Step 10: Configure Module App build.gradle"
+        run: |
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id "com.android.application"
+              id "org.jetbrains.kotlin.android"
+          }
+
+          android {
+              namespace "com.zeeshan.notice"
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "com.zeeshan.notice"
+                  minSdk 26
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions { jvmTarget = "17" }
+          }
+
+          dependencies {
+              implementation "androidx.core:core-ktx:1.13.1"
+              implementation "androidx.appcompat:appcompat:1.7.0"
+              implementation "com.google.android.material:material:1.12.0"
+              implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+              implementation "androidx.drawerlayout:drawerlayout:1.2.0"
+              implementation "androidx.viewpager2:viewpager2:1.1.0"
+          }
+          EOF
+
+      # ==========================================
+      # STEP 5: Color Palette & Drawables (3D Styling)
+      # ==========================================
+      - name: "Robot Step 11: Create App Strings Configuration"
+        run: |
+          cat > app/src/main/res/values/strings.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Zeeshan Notice</string>
+              <string name="dashboard_title">𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞</string>
+          </resources>
+          EOF
+
+      - name: "Robot Step 12: Create Unified VIP Chocolate 3D Palette"
+        run: |
+          cat > app/src/main/res/values/colors.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <color name="chocolate_dark">#2B170C</color>
+              <color name="chocolate_main">#3D2314</color>
+              <color name="chocolate_light">#5A3822</color>
+              <color name="chocolate_border">#D4AF37</color>
+              <color name="bg_cream">#FDFBF7</color>
+              <color name="white">#FFFFFF</color>
+              <color name="text_dark">#1C100A</color>
+              <color name="gold_accent">#D4AF37</color>
+              <color name="progress_green">#2ECC71</color>
+              <color name="progress_red">#E74C3C</color>
+          </resources>
+          EOF
+
+      - name: "Robot Step 13: Create Drawer Navigation Menu"
+        run: |
+          cat > app/src/main/res/menu/drawer_menu.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <menu xmlns:android="http://schemas.android.com/apk/res/android">
+              <!-- Empty Navigation Menu -->
+          </menu>
+          EOF
+
+      # ==========================================
+      # STEP 6: Icons & 3D Vector Drawables
+      # ==========================================
+      - name: "Robot Step 14: Generate 3D Icon Background Asset"
+        run: |
+          cat > app/src/main/res/drawable/ic_launcher_bg.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:aapt="http://schemas.android.com/aapt"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path android:pathData="M0,0h108v108h-108z">
+                  <aapt:attr name="android:fillColor">
+                      <gradient
+                          android:startX="0"
+                          android:startY="0"
+                          android:endX="108"
+                          android:endY="108"
+                          android:type="linear">
+                          <item android:offset="0.0" android:color="#5A3822"/>
+                          <item android:offset="1.0" android:color="#2B170C"/>
+                      </gradient>
+                  </aapt:attr>
+              </path>
+          </vector>
+          EOF
+
+      - name: "Robot Step 15: Generate 3D White Z Foreground Vector"
+        run: |
+          cat > app/src/main/res/drawable/ic_launcher_fg.xml <<'EOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <path
+                  android:fillColor="#1C100A"
+                  android:pathData="M28,28 L80,28 L80,42 L48,68 L80,68 L80,82 L28,82 L28,68 L60,42 L28,42 Z" />
+              <path
+                  android:fillColor="#FFFFFF"
+                  android:pathData="M25,25 L77,25 L77,39 L45,65 L77,65 L77,79 L25,79 L25,65 L57,39 L25,39 Z" />
+          </vector>
+          EOF
+
+      - name: "Robot Step 16: Create Adaptive Icon Configuration"
+        run: |
+          cat > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@drawable/ic_launcher_bg" />
+              <foreground android:drawable="@drawable/ic_launcher_fg" />
+          </adaptive-icon>
+          EOF
+
+      # ==========================================
+      # STEP 7: Manifest & Kotlin Logic (with 3D Dialogs)
+      # ==========================================
+      - name: "Robot Step 17: Write AndroidManifest.xml"
+        run: |
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+              <application
+                  android:allowBackup="false"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="@string/app_name"
+                  android:roundIcon="@mipmap/ic_launcher"
+                  android:supportsRtl="true"
+                  android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true"
+                      android:windowSoftInputMode="adjustResize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+
+              </application>
+          </manifest>
+          EOF
+
+      - name: "Robot Step 18: Write MainActivity.kt (3D Glossy Dialogs Integrated)"
+        run: |
+          cat > app/src/main/java/com/zeeshan/notice/MainActivity.kt <<'EOF'
+          package com.zeeshan.notice
+
+          import android.app.AlertDialog
+          import android.app.Dialog
+          import android.content.ContentValues
+          import android.content.Context
+          import android.content.SharedPreferences
+          import android.database.sqlite.SQLiteDatabase
+          import android.database.sqlite.SQLiteOpenHelper
+          import android.graphics.Canvas
+          import android.graphics.Color
+          import android.graphics.Paint
+          import android.graphics.Typeface
+          import android.graphics.drawable.ColorDrawable
+          import android.graphics.drawable.GradientDrawable
+          import android.os.Bundle
+          import android.text.Editable
+          import android.text.Html
+          import android.text.InputType
+          import android.text.Spannable
+          import android.text.TextWatcher
+          import android.text.style.ForegroundColorSpan
+          import android.view.Gravity
+          import android.view.MotionEvent
+          import android.view.ScaleGestureDetector
+          import android.view.View
+          import android.view.ViewGroup
+          import android.view.Window
+          import android.view.inputmethod.InputMethodManager
+          import android.widget.*
+          import androidx.appcompat.app.AppCompatActivity
+          import androidx.core.view.GravityCompat
+          import androidx.drawerlayout.widget.DrawerLayout
+          import com.google.android.material.navigation.NavigationView
+          import java.io.File
+
+          data class ItemModel(
+              val id: Long,
+              val title: String,
+              val content: String,
+              val isFolder: Boolean,
+              val parentFolderId: Long,
+              val isLocked: Boolean,
+              val isEditorLocked: Boolean = false
+          )
+
+          class DynamicCanvasEditText(context: Context) : androidx.appcompat.widget.AppCompatEditText(context) {
+              var pageStyle: String = "Plain"
+                  set(value) {
+                      field = value
+                      invalidate()
+                  }
+
+              private var scaleFactor = 1.0f
+              private val baseTextSizeSp = 16f
+
+              private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                  override fun onScale(detector: ScaleGestureDetector): Boolean {
+                      scaleFactor *= detector.scaleFactor
+                      scaleFactor = scaleFactor.coerceIn(1.0f, 6.0f)
+                      textSize = baseTextSizeSp * scaleFactor
+                      return true
+                  }
+              })
+
+              override fun onTouchEvent(event: MotionEvent): Boolean {
+                  if (!isFocusable) {
+                      scaleDetector.onTouchEvent(event)
+                  }
+                  return super.onTouchEvent(event)
+              }
+
+              private val linePaint = Paint().apply {
+                  color = Color.parseColor("#B0C4DE")
+                  strokeWidth = 2f
+              }
+
+              private val marginPaint = Paint().apply {
+                  color = Color.parseColor("#FF6B6B")
+                  strokeWidth = 3f
+              }
+
+              override fun onDraw(canvas: Canvas) {
+                  when (pageStyle) {
+                      "Ruled" -> {
+                          val lineH = lineHeight
+                          val count = height / lineH
+                          for (i in 1..count) {
+                              val y = (i * lineH).toFloat()
+                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
+                          }
+                      }
+                      "Grid" -> {
+                          val step = 60f
+                          var x = 0f
+                          while (x < width) {
+                              canvas.drawLine(x, 0f, x, height.toFloat(), linePaint)
+                              x += step
+                          }
+                          var y = 0f
+                          while (y < height) {
+                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
+                              y += step
+                          }
+                      }
+                      "Vertical" -> {
+                          val lineH = lineHeight
+                          val count = height / lineH
+                          for (i in 1..count) {
+                              val y = (i * lineH).toFloat()
+                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
+                          }
+                          canvas.drawLine(90f, 0f, 90f, height.toFloat(), marginPaint)
+                      }
+                  }
+                  super.onDraw(canvas)
+              }
+          }
+
+          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 7) {
+              override fun onCreate(db: SQLiteDatabase) {
+                  db.execSQL("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, is_folder INTEGER, parent_id INTEGER, is_locked INTEGER DEFAULT 0, is_editor_locked INTEGER DEFAULT 0)")
+              }
+              override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+                  db.execSQL("DROP TABLE IF EXISTS items")
+                  onCreate(db)
+              }
+          }
+
+          class MainActivity : AppCompatActivity() {
+
+              companion object {
+                  const val MAX_STORAGE_BYTES: Long = 100L * 1024L * 1024L 
+              }
+
+              @Volatile private var currentUsedBytesCached: Long = 0L
+
+              private lateinit var dbHelper: DatabaseHelper
+              private lateinit var prefs: SharedPreferences
+              private lateinit var drawerLayout: DrawerLayout
+              private lateinit var mainContainer: LinearLayout
+              private lateinit var dashboardHeader: FrameLayout
+              private lateinit var projectHeader: LinearLayout
+              private lateinit var dashboardTitleTv: TextView
+              private lateinit var projectTitleTv: TextView
+              private lateinit var drawerMemoryText: TextView
+              private lateinit var drawerProgressView: View
+              private lateinit var editorLayout: LinearLayout
+              private lateinit var noticeListLayout: LinearLayout
+              private lateinit var emptyStateTv: TextView
+              private lateinit var noteEditText: DynamicCanvasEditText
+              private lateinit var colorMenuBtn: Button
+              private lateinit var lockToggleBtn: Button
+
+              private var currentFolderId: Long = 0L
+              private var editingNoteId: Long? = null
+              private var selectedStyleTemp: String = "Plain"
+
+              private var activeColor: Int = Color.BLACK
+              private var isSelfTextChange = false
+              private var isPageEditorLocked = true
+
+              private val baseHueArray = floatArrayOf(
+                  0f, 0f, 210f, 120f, 60f, 30f, 300f, 280f,
+                  25f, 180f, 84f, 15f, 200f, 340f, 45f, 160f,
+                  270f, 190f, 10f, 50f, 140f, 230f, 320f, 220f
+              )
+
+              private val color120Matrix = ArrayList<List<Int>>()
+
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+                  dbHelper = DatabaseHelper(this)
+                  prefs = getSharedPreferences("ZeeshanNoticePrefs", Context.MODE_PRIVATE)
+
+                  generate120ColorsData()
+
+                  drawerLayout = DrawerLayout(this).apply {
+                      layoutParams = FrameLayout.LayoutParams(-1, -1)
+                  }
+
+                  mainContainer = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setBackgroundColor(Color.parseColor("#FDFBF7"))
+                      layoutParams = FrameLayout.LayoutParams(-1, -1)
+                  }
+
+                  dashboardHeader = FrameLayout(this).apply {
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      )
+                      setPadding(20, 25, 20, 25)
+                      elevation = 14f
+                      layoutParams = LinearLayout.LayoutParams(-1, -2)
+                  }
+
+                  val menuBtn = TextView(this).apply {
+                      text = "≡"
+                      textSize = 28f
+                      setTextColor(Color.WHITE)
+                      setTypeface(null, Typeface.BOLD)
+                      setPadding(20, 0, 20, 0)
+                      layoutParams = FrameLayout.LayoutParams(-2, -2, Gravity.START or Gravity.CENTER_VERTICAL)
+                      setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
+                  }
+
+                  dashboardTitleTv = TextView(this).apply {
+                      text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
+                      textSize = 22f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#FDFBF7"))
+                      setShadowLayer(8f, 3f, 5f, Color.parseColor("#1C100A"))
+                      gravity = Gravity.CENTER
+                      layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.CENTER)
+                  }
+
+                  dashboardHeader.addView(dashboardTitleTv)
+                  dashboardHeader.addView(menuBtn)
+
+                  projectHeader = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(30, 35, 30, 35)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      )
+                      visibility = View.GONE
+                      elevation = 14f
+                  }
+
+                  val backBtn = TextView(this).apply {
+                      text = "←"
+                      textSize = 26f
+                      setTextColor(Color.WHITE)
+                      setTypeface(null, Typeface.BOLD)
+                      setPadding(0, 0, 25, 0)
+                      setOnClickListener { closeEditor() }
+                  }
+
+                  projectTitleTv = TextView(this).apply {
+                      text = "New Page"
+                      textSize = 18f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  val saveBtn = TextView(this).apply {
+                      text = "✔ SAVE"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#D4AF37"))
+                      setOnClickListener { saveCurrentNote() }
+                  }
+
+                  projectHeader.addView(backBtn)
+                  projectHeader.addView(projectTitleTv)
+                  projectHeader.addView(saveBtn)
+
+                  noticeListLayout = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(30, 30, 30, 30)
+                      layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
+                  }
+
+                  emptyStateTv = TextView(this).apply {
+                      text = "No folders or pages available.\nTap '+' below to create a new folder or page."
+                      textSize = 15f
+                      setTextColor(Color.GRAY)
+                      gravity = Gravity.CENTER
+                      layoutParams = LinearLayout.LayoutParams(-1, -1)
+                  }
+                  noticeListLayout.addView(emptyStateTv)
+
+                  editorLayout = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setBackgroundColor(Color.WHITE)
+                      visibility = View.GONE
+                      layoutParams = LinearLayout.LayoutParams(-1, -1, 1f)
+                  }
+
+                  val styleToolBar = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 15, 20, 15)
+                      setBackgroundColor(Color.parseColor("#F5EFE6"))
+                  }
+
+                  colorMenuBtn = Button(this).apply {
+                      text = "🎨 Color"
+                      textSize = 13f
+                      setTextColor(Color.BLACK)
+                      setTypeface(null, Typeface.BOLD)
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(4, Color.BLACK)
+                      }
+                      setOnClickListener { openCompactColorPicker() }
+                  }
+
+                  val styleMenuBtn = Button(this).apply {
+                      text = "📄 Style"
+                      textSize = 13f
+                      setTextColor(Color.parseColor("#3D2314"))
+                      setTypeface(null, Typeface.BOLD)
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(2, Color.parseColor("#3D2314"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
+                      setOnClickListener { showPageStyleDialog() }
+                  }
+
+                  lockToggleBtn = Button(this).apply {
+                      text = "🔒"
+                      textSize = 15f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(2, Color.parseColor("#3D2314"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
+                      setOnClickListener { toggleEditorLockState() }
+                  }
+
+                  styleToolBar.addView(colorMenuBtn)
+                  styleToolBar.addView(styleMenuBtn)
+                  styleToolBar.addView(lockToggleBtn)
+
+                  noteEditText = DynamicCanvasEditText(this).apply {
+                      hint = "Write your notice here..."
+                      textSize = 16f
+                      setPadding(40, 40, 40, 40)
+                      gravity = Gravity.TOP
+                      setBackgroundColor(Color.TRANSPARENT)
+                      layoutParams = LinearLayout.LayoutParams(-1, -1)
+                  }
+
+                  noteEditText.addTextChangedListener(object : TextWatcher {
+                      private var startPos = 0
+                      private var countAdded = 0
+
+                      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                          startPos = start
+                          countAdded = count
+                      }
+                      override fun afterTextChanged(editable: Editable?) {
+                          if (editable == null || isSelfTextChange || countAdded <= 0) return
+                          
+                          if (isMemoryFull()) {
+                              showMemoryFullPopUp()
+                              isPageEditorLocked = true
+                              applyEditorLockUI()
+                              return
+                          }
+
+                          isSelfTextChange = true
+                          editable.setSpan(
+                              ForegroundColorSpan(activeColor),
+                              startPos,
+                              startPos + countAdded,
+                              Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                          )
+                          isSelfTextChange = false
+                      }
+                  })
+
+                  editorLayout.addView(styleToolBar)
+                  editorLayout.addView(noteEditText)
+
+                  val fabLayout = FrameLayout(this).apply {
+                      layoutParams = LinearLayout.LayoutParams(-1, -2)
+                  }
+                  val fabBtn = Button(this).apply {
+                      text = "+"
+                      textSize = 30f
+                      setTextColor(Color.WHITE)
+                      background = GradientDrawable().apply {
+                          shape = GradientDrawable.OVAL
+                          setColor(Color.parseColor("#3D2314"))
+                          setStroke(4, Color.parseColor("#D4AF37"))
+                      }
+                      elevation = 12f
+                      layoutParams = FrameLayout.LayoutParams(130, 130).apply {
+                          gravity = Gravity.END or Gravity.BOTTOM
+                          setMargins(0, 0, 40, 40)
+                      }
+                      setOnClickListener { 
+                          if (isMemoryFull()) {
+                              showMemoryFullPopUp()
+                          } else {
+                              show3DChooseActionDialog() 
+                          }
+                      }
+                  }
+                  fabLayout.addView(fabBtn)
+
+                  mainContainer.addView(dashboardHeader)
+                  mainContainer.addView(projectHeader)
+                  mainContainer.addView(noticeListLayout)
+                  mainContainer.addView(editorLayout)
+                  mainContainer.addView(fabLayout)
+
+                  val navView = NavigationView(this).apply {
+                      layoutParams = DrawerLayout.LayoutParams(720, -1).apply {
+                          gravity = GravityCompat.START
+                      }
+                      inflateMenu(R.menu.drawer_menu)
+                  }
+
+                  val drawerHeaderCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(40, 50, 40, 40)
+                      setBackgroundColor(Color.parseColor("#FDFBF7"))
+                  }
+
+                  val memoryTitle = TextView(this).apply {
+                      text = "Memory"
+                      textSize = 20f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1C100A"))
+                      setPadding(0, 0, 0, 20)
+                  }
+
+                  val progressTrack = FrameLayout(this).apply {
+                      layoutParams = LinearLayout.LayoutParams(-1, 28).apply {
+                          setMargins(0, 0, 0, 20)
+                      }
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#E0E0E0"))
+                          cornerRadius = 14f
+                      }
+                  }
+
+                  drawerProgressView = View(this).apply {
+                      layoutParams = FrameLayout.LayoutParams(0, -1)
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#2ECC71"))
+                          cornerRadius = 14f
+                      }
+                  }
+                  progressTrack.addView(drawerProgressView)
+
+                  drawerMemoryText = TextView(this).apply {
+                      text = "0.00 KB / 100 MB"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#5A3822"))
+                  }
+
+                  drawerHeaderCard.addView(memoryTitle)
+                  drawerHeaderCard.addView(progressTrack)
+                  drawerHeaderCard.addView(drawerMemoryText)
+
+                  navView.addHeaderView(drawerHeaderCard)
+
+                  drawerLayout.addView(mainContainer)
+                  drawerLayout.addView(navView)
+                  setContentView(drawerLayout)
+
+                  loadCurrentDirectoryItems()
+                  updateMemoryUsage()
+              }
+
+              private fun getJavaStorageUsageBytes(): Long {
+                  var totalSize: Long = 0
+                  try {
+                      val dbFile = getDatabasePath("ZeeshanNotice.db")
+                      if (dbFile.exists()) {
+                          totalSize += dbFile.length()
+                      }
+                      val filesDirSize = getFolderSize(filesDir)
+                      totalSize += filesDirSize
+                  } catch (e: Exception) {
+                      e.printStackTrace()
+                  }
+                  return totalSize
+              }
+
+              private fun getFolderSize(file: File): Long {
+                  var size: Long = 0
+                  if (file.isDirectory) {
+                      val files = file.listFiles()
+                      if (files != null) {
+                          for (f in files) {
+                              size += getFolderSize(f)
+                          }
+                      }
+                  } else if (file.exists()) {
+                      size = file.length()
+                  }
+                  return size
+              }
+
+              private fun isMemoryFull(): Boolean {
+                  return currentUsedBytesCached >= MAX_STORAGE_BYTES
+              }
+
+              private fun showMemoryFullPopUp() {
+                  AlertDialog.Builder(this)
+                      .setTitle("⚠️ Memory Full!")
+                      .setMessage("Your 100 MB memory is full!\n\nPlease delete old items to free up space.")
+                      .setPositiveButton("OK", null)
+                      .show()
+              }
+
+              private fun toggleEditorLockState() {
+                  if (isMemoryFull()) {
+                      showMemoryFullPopUp()
+                      isPageEditorLocked = true
+                      applyEditorLockUI()
+                      return
+                  }
+                  isPageEditorLocked = !isPageEditorLocked
+                  applyEditorLockUI()
+              }
+
+              private fun applyEditorLockUI() {
+                  if (isPageEditorLocked) {
+                      lockToggleBtn.text = "🔒"
+                      noteEditText.isFocusable = false
+                      noteEditText.isFocusableInTouchMode = false
+                      noteEditText.clearFocus()
+                      val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                      imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
+                      if (!isMemoryFull()) {
+                          Toast.makeText(this, "🔒 Page Locked (6x Zoom Active)", Toast.LENGTH_SHORT).show()
+                      }
+                  } else {
+                      lockToggleBtn.text = "🔓"
+                      noteEditText.isFocusable = true
+                      noteEditText.isFocusableInTouchMode = true
+                      noteEditText.requestFocus()
+                      val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                      imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT)
+                      Toast.makeText(this, "🔓 Unlocked! Typing enabled", Toast.LENGTH_SHORT).show()
+                  }
+              }
+
+              private fun promptPinLock(title: String, message: String, onSuccess: () -> Unit) {
+                  val masterPin = prefs.getString("master_pin", "1234")
+                  val input = EditText(this).apply {
+                      inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+                      hint = "Enter 4-Digit PIN"
+                  }
+                  val dialog = AlertDialog.Builder(this)
+                      .setTitle(title)
+                      .setMessage(message)
+                      .setView(input)
+                      .setCancelable(true)
+                      .setPositiveButton("SHOW", null)
+                      .setNegativeButton("CANCEL", null)
+                      .create()
+
+                  dialog.setOnShowListener {
+                      val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                      button.setOnClickListener {
+                          val entered = input.text.toString().trim()
+                          if (entered == masterPin) {
+                              dialog.dismiss()
+                              onSuccess()
+                          } else {
+                              Toast.makeText(this, "❌ Incorrect PIN!", Toast.LENGTH_SHORT).show()
+                          }
+                      }
+                  }
+                  dialog.show()
+              }
+
+              private fun generate120ColorsData() {
+                  color120Matrix.clear()
+                  val blackShades = listOf(
+                      Color.BLACK,
+                      Color.parseColor("#1C1C1C"),
+                      Color.parseColor("#383838"),
+                      Color.parseColor("#545454"),
+                      Color.parseColor("#707070"),
+                      Color.parseColor("#8C8C8C")
+                  )
+                  color120Matrix.add(blackShades)
+
+                  for (i in 1 until 20) {
+                      val hue = baseHueArray[i % baseHueArray.size]
+                      val stdList = ArrayList<Int>()
+                      stdList.add(Color.HSVToColor(floatArrayOf(hue, 0.9f, 0.7f)))
+                      val stdVals = floatArrayOf(0.95f, 0.8f, 0.65f, 0.5f, 0.35f)
+                      for (s in 0 until 5) {
+                          stdList.add(Color.HSVToColor(floatArrayOf(hue, 0.85f, stdVals[s])))
+                      }
+                      color120Matrix.add(stdList)
+                  }
+              }
+
+              private fun openCompactColorPicker() {
+                  val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+                  var tempSelectedColor = activeColor
+
+                  val rootLayout = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setBackgroundColor(Color.parseColor("#121212"))
+                      layoutParams = ViewGroup.LayoutParams(-1, -1)
+                  }
+
+                  val headerBar = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(30, 20, 30, 20)
+                      setBackgroundColor(Color.parseColor("#1F1F1F"))
+                      elevation = 12f
+                  }
+
+                  val backBtn = TextView(this).apply {
+                      text = "←"
+                      textSize = 28f
+                      setTextColor(Color.WHITE)
+                      setTypeface(null, Typeface.BOLD)
+                      setPadding(10, 0, 30, 0)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  val pencilPreview = TextView(this).apply {
+                      text = "🎨"
+                      textSize = 22f
+                      setPadding(15, 8, 15, 8)
+                      background = GradientDrawable().apply {
+                          shape = GradientDrawable.OVAL
+                          setColor(tempSelectedColor)
+                          setStroke(3, Color.WHITE)
+                      }
+                  }
+
+                  val titleTv = TextView(this).apply {
+                      text = " Select Color (120 Colors)"
+                      textSize = 17f
+                      setTextColor(Color.WHITE)
+                      setTypeface(null, Typeface.BOLD)
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  val showBtn = Button(this).apply {
+                      text = "SHOW"
+                      textSize = 14f
+                      setTextColor(Color.BLACK)
+                      setTypeface(null, Typeface.BOLD)
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#D4AF37"))
+                          cornerRadius = 15f
+                      }
+                      setOnClickListener {
+                          activeColor = tempSelectedColor
+                          updateColorButtonUI()
+                          Toast.makeText(this@MainActivity, "Color Applied!", Toast.LENGTH_SHORT).show()
+                          dialog.dismiss()
+                      }
+                  }
+
+                  headerBar.addView(backBtn)
+                  headerBar.addView(pencilPreview)
+                  headerBar.addView(titleTv)
+                  headerBar.addView(showBtn)
+
+                  val scrollView = ScrollView(this).apply {
+                      layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
+                  }
+                  val pageContainer = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(15, 15, 15, 15)
+                  }
+                  scrollView.addView(pageContainer)
+
+                  for (row in color120Matrix) {
+                      val rowLayout = LinearLayout(this).apply {
+                          orientation = LinearLayout.HORIZONTAL
+                          gravity = Gravity.CENTER_HORIZONTAL
+                          layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                              setMargins(0, 4, 0, 4)
+                          }
+                      }
+
+                      for (colorVal in row) {
+                          val box = View(this).apply {
+                              layoutParams = LinearLayout.LayoutParams(70, 70).apply {
+                                  setMargins(5, 5, 5, 5)
+                              }
+                              background = GradientDrawable().apply {
+                                  setColor(colorVal)
+                                  cornerRadius = 12f
+                                  setStroke(2, Color.parseColor("#444444"))
+                              }
+                              setOnClickListener {
+                                  tempSelectedColor = colorVal
+                                  (pencilPreview.background as GradientDrawable).setColor(colorVal)
+                              }
+                          }
+                          rowLayout.addView(box)
+                      }
+                      pageContainer.addView(rowLayout)
+                  }
+
+                  rootLayout.addView(headerBar)
+                  rootLayout.addView(scrollView)
+
+                  dialog.setContentView(rootLayout)
+                  dialog.show()
+              }
+
+              private fun updateColorButtonUI() {
+                  colorMenuBtn.setTextColor(if (isColorDark(activeColor)) Color.WHITE else Color.BLACK)
+                  colorMenuBtn.background = GradientDrawable().apply {
+                      setColor(activeColor)
+                      cornerRadius = 20f
+                      setStroke(4, Color.parseColor("#3D2314"))
+                  }
+              }
+
+              private fun isColorDark(color: Int): Boolean {
+                  val darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+                  return darkness >= 0.5
+              }
+
+              private fun showPageStyleDialog() {
+                  val options = arrayOf(
+                      "📄 1. Plain Page",
+                      "📝 2. Ruled Lines",
+                      "🔲 3. Grid / Box Style",
+                      "📑 4. Vertical Margin Line"
+                  )
+                  val keys = arrayOf("Plain", "Ruled", "Grid", "Vertical")
+
+                  selectedStyleTemp = noteEditText.pageStyle
+
+                  AlertDialog.Builder(this)
+                      .setTitle("Select Page Style")
+                      .setSingleChoiceItems(options, keys.indexOf(noteEditText.pageStyle)) { _, which ->
+                          selectedStyleTemp = keys[which]
+                      }
+                      .setPositiveButton("SHOW") { _, _ ->
+                          noteEditText.pageStyle = selectedStyleTemp
+                          Toast.makeText(this, "Page style updated!", Toast.LENGTH_SHORT).show()
+                      }
+                      .setNegativeButton("CANCEL", null)
+                      .show()
+              }
+
+              override fun onBackPressed() {
+                  if (editorLayout.visibility == View.VISIBLE) {
+                      closeEditor()
+                  } else if (currentFolderId != 0L) {
+                      currentFolderId = 0L
+                      dashboardTitleTv.text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
+                      loadCurrentDirectoryItems()
+                  } else {
+                      super.onBackPressed()
+                  }
+              }
+
+              // ==========================================
+              # 3D GLOSSY CUSTOM DIALOGS IMPLEMENTATION
+              // ==========================================
+              private fun show3DChooseActionDialog() {
+                  val dialog = Dialog(this)
+                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                  val dialogCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 24f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#FDFBF7"))
+                          cornerRadius = 45f
+                          setStroke(6, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = ViewGroup.LayoutParams(850, -2)
+                  }
+
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(35, 30, 35, 30)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val headerIcon = TextView(this).apply {
+                      text = "📁⁺"
+                      textSize = 28f
+                      setPadding(0, 0, 20, 0)
+                  }
+
+                  val title = TextView(this).apply {
+                      text = "Choose Action"
+                      textSize = 24f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  header.addView(headerIcon)
+                  header.addView(title)
+
+                  val body = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(30, 35, 30, 20)
+                  }
+
+                  val folderRow = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(25, 25, 25, 25)
+                      elevation = 8f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 30f
+                          setStroke(3, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                          setMargins(0, 0, 0, 25)
+                      }
+                      setOnClickListener {
+                          dialog.dismiss()
+                          show3DCreateFolderDialog()
+                      }
+                  }
+
+                  val folderIcon = TextView(this).apply {
+                      text = "📁"
+                      textSize = 26f
+                      setPadding(10, 5, 20, 5)
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#3D2314"))
+                          cornerRadius = 18f
+                      }
+                  }
+
+                  val folderText = TextView(this).apply {
+                      text = "Create New Folder"
+                      textSize = 17f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1C100A"))
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  val arrow1 = TextView(this).apply {
+                      text = "❯"
+                      textSize = 18f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#3D2314"))
+                  }
+
+                  folderRow.addView(folderIcon)
+                  folderRow.addView(folderText)
+                  folderRow.addView(arrow1)
+
+                  val pageRow = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(25, 25, 25, 25)
+                      elevation = 8f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 30f
+                          setStroke(3, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                          setMargins(0, 0, 0, 25)
+                      }
+                      setOnClickListener {
+                          dialog.dismiss()
+                          show3DCreatePageDialog()
+                      }
+                  }
+
+                  val pageIcon = TextView(this).apply {
+                      text = "📄"
+                      textSize = 26f
+                      setPadding(10, 5, 20, 5)
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#3D2314"))
+                          cornerRadius = 18f
+                      }
+                  }
+
+                  val pageText = TextView(this).apply {
+                      text = "Create New Page"
+                      textSize = 17f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1C100A"))
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  val arrow2 = TextView(this).apply {
+                      text = "❯"
+                      textSize = 18f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#3D2314"))
+                  }
+
+                  pageRow.addView(pageIcon)
+                  pageRow.addView(pageText)
+                  pageRow.addView(arrow2)
+
+                  val footer = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 10, 30, 30)
+                  }
+
+                  val cancelBtn = TextView(this).apply {
+                      text = "CANCEL"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#3D2314"))
+                      setPadding(30, 15, 30, 15)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  footer.addView(cancelBtn)
+
+                  body.addView(folderRow)
+                  body.addView(pageRow)
+
+                  dialogCard.addView(header)
+                  dialogCard.addView(body)
+                  dialogCard.addView(footer)
+
+                  dialog.setContentView(dialogCard)
+                  dialog.show()
+              }
+
+              private fun show3DCreateFolderDialog() {
+                  val dialog = Dialog(this)
+                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                  val dialogCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 24f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#FDFBF7"))
+                          cornerRadius = 45f
+                          setStroke(6, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = ViewGroup.LayoutParams(850, -2)
+                  }
+
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(35, 30, 35, 30)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val headerIcon = TextView(this).apply { text = "📁 "; textSize = 26f }
+                  val title = TextView(this).apply {
+                      text = "Create New Folder"
+                      textSize = 22f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                  }
+                  header.addView(headerIcon)
+                  header.addView(title)
+
+                  val body = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(35, 30, 35, 20)
+                  }
+
+                  val label = TextView(this).apply {
+                      text = "Enter folder name:"
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1C100A"))
+                      setPadding(0, 0, 0, 15)
+                  }
+
+                  val input = EditText(this).apply {
+                      hint = "Folder Name"
+                      textSize = 16f
+                      setPadding(30, 25, 30, 25)
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(3, Color.parseColor("#D4AF37"))
+                      }
+                  }
+
+                  body.addView(label)
+                  body.addView(input)
+
+                  val footer = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 10, 35, 35)
+                  }
+
+                  val cancelBtn = TextView(this).apply {
+                      text = "CANCEL"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#3D2314"))
+                      setPadding(30, 15, 30, 15)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  val createBtn = Button(this).apply {
+                      text = "CREATE"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      elevation = 8f
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
+                      setOnClickListener {
+                          val name = input.text.toString().ifEmpty { "New Folder" }
+                          saveFolderToDb(name, currentFolderId)
+                          loadCurrentDirectoryItems()
+                          dialog.dismiss()
+                      }
+                  }
+
+                  footer.addView(cancelBtn)
+                  footer.addView(createBtn)
+
+                  dialogCard.addView(header)
+                  dialogCard.addView(body)
+                  dialogCard.addView(footer)
+
+                  dialog.setContentView(dialogCard)
+                  dialog.show()
+              }
+
+              private fun show3DCreatePageDialog() {
+                  val dialog = Dialog(this)
+                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                  val dialogCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 24f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#FDFBF7"))
+                          cornerRadius = 45f
+                          setStroke(6, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = ViewGroup.LayoutParams(850, -2)
+                  }
+
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(35, 30, 35, 30)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val headerIcon = TextView(this).apply { text = "📄 "; textSize = 26f }
+                  val title = TextView(this).apply {
+                      text = "Create New Page"
+                      textSize = 22f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                  }
+                  header.addView(headerIcon)
+                  header.addView(title)
+
+                  val body = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(35, 30, 35, 20)
+                  }
+
+                  val label = TextView(this).apply {
+                      text = "Enter page title:"
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1C100A"))
+                      setPadding(0, 0, 0, 15)
+                  }
+
+                  val input = EditText(this).apply {
+                      hint = "Page Title"
+                      textSize = 16f
+                      setPadding(30, 25, 30, 25)
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(3, Color.parseColor("#D4AF37"))
+                      }
+                  }
+
+                  body.addView(label)
+                  body.addView(input)
+
+                  val footer = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 10, 35, 35)
+                  }
+
+                  val cancelBtn = TextView(this).apply {
+                      text = "CANCEL"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#3D2314"))
+                      setPadding(30, 15, 30, 15)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  val createBtn = Button(this).apply {
+                      text = "CREATE"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      elevation = 8f
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
+                      setOnClickListener {
+                          val pageTitle = input.text.toString().ifEmpty { "Untitled Page" }
+                          editingNoteId = null
+                          openEditor(pageTitle, "")
+                          dialog.dismiss()
+                      }
+                  }
+
+                  footer.addView(cancelBtn)
+                  footer.addView(createBtn)
+
+                  dialogCard.addView(header)
+                  dialogCard.addView(body)
+                  dialogCard.addView(footer)
+
+                  dialog.setContentView(dialogCard)
+                  dialog.show()
+              }
+
+              private fun saveFolderToDb(title: String, parentId: Long): Long {
+                  val db = dbHelper.writableDatabase
+                  val values = ContentValues().apply {
+                      put("title", title)
+                      put("content", "")
+                      put("is_folder", 1)
+                      put("parent_id", parentId)
+                      put("is_locked", 0)
+                      put("is_editor_locked", 1)
+                  }
+                  val id = db.insert("items", null, values)
+                  updateMemoryUsage()
+                  return id
+              }
+
+              private fun loadCurrentDirectoryItems() {
+                  noticeListLayout.removeAllViews()
+                  val db = dbHelper.readableDatabase
+                  val cursor = db.rawQuery("SELECT * FROM items WHERE parent_id = ?", arrayOf(currentFolderId.toString()))
+                  
+                  if (cursor.count == 0) {
+                      noticeListLayout.addView(emptyStateTv)
+                      emptyStateTv.visibility = View.VISIBLE
+                  } else {
+                      emptyStateTv.visibility = View.GONE
+                      while (cursor.moveToNext()) {
+                          val id = cursor.getLong(cursor.getColumnIndexOrThrow("id"))
+                          val title = cursor.getString(cursor.getColumnIndexOrThrow("title"))
+                          val content = cursor.getString(cursor.getColumnIndexOrThrow("content"))
+                          val isFolder = cursor.getInt(cursor.getColumnIndexOrThrow("is_folder")) == 1
+                          val isLocked = cursor.getInt(cursor.getColumnIndexOrThrow("is_locked")) == 1
+                          val isEditorLocked = cursor.getInt(cursor.getColumnIndexOrThrow("is_editor_locked")) == 1
+                          
+                          renderItemCard(ItemModel(id, title, content, isFolder, currentFolderId, isLocked, isEditorLocked))
+                      }
+                  }
+                  cursor.close()
+              }
+
+              private fun renderItemCard(item: ItemModel) {
+                  val card = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 8f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#D4AF37"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                          setMargins(0, 0, 0, 25)
+                      }
+                      setOnClickListener {
+                          if (item.isFolder) {
+                              if (item.isLocked) {
+                                  promptPinLock("🔐 Locked Folder", "Enter PIN to unlock this folder:") {
+                                      currentFolderId = item.id
+                                      dashboardTitleTv.text = "📁 ${item.title}"
+                                      loadCurrentDirectoryItems()
+                                  }
+                              } else {
+                                  currentFolderId = item.id
+                                  dashboardTitleTv.text = "📁 ${item.title}"
+                                  loadCurrentDirectoryItems()
+                              }
+                          } else {
+                              if (item.isLocked) {
+                                  promptPinLock("🔐 Locked Page", "Enter PIN to unlock this page:") {
+                                      editingNoteId = item.id
+                                      openEditor(item.title, item.content)
+                                  }
+                              } else {
+                                  editingNoteId = item.id
+                                  openEditor(item.title, item.content)
+                              }
+                          }
+                      }
+                      setOnLongClickListener {
+                          showOptionMenu(item)
+                          true
+                      }
+                  }
+
+                  val headerText = if (item.isFolder) {
+                      if (item.isLocked) "🔐 📁 ${item.title} (Locked)" else "📁 ${item.title}"
+                  } else {
+                      if (item.isLocked) "🔐 📄 ${item.title} (Locked)" else "📄 ${item.title}"
+                  }
+
+                  val header = TextView(this).apply {
+                      text = headerText
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      setPadding(25, 18, 25, 18)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(25f, 25f, 25f, 25f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val body = TextView(this).apply {
+                      val plainText = Html.fromHtml(item.content, Html.FROM_HTML_MODE_LEGACY).toString()
+                      text = if (item.isFolder) {
+                          if (item.isLocked) "🔒 Protected Folder (PIN required)" else "Folder (Tap to open)"
+                      } else {
+                          if (item.isLocked) {
+                              "🔒 Protected Page (PIN required)"
+                          } else {
+                              if (plainText.length > 40) plainText.substring(0, 40) + "..." else plainText.ifEmpty { "Empty note" }
+                          }
+                      }
+                      textSize = 13f
+                      setTextColor(Color.parseColor("#444444"))
+                      setPadding(25, 20, 25, 20)
+                  }
+
+                  card.addView(header)
+                  card.addView(body)
+                  noticeListLayout.addView(card)
+              }
+
+              private fun showOptionMenu(item: ItemModel) {
+                  val lockOption = if (item.isLocked) "🔓 Remove Password" else "🔐 Add Password"
+                  val options = arrayOf("✏ Rename", lockOption, "🗑 Delete")
+
+                  AlertDialog.Builder(this)
+                      .setTitle(item.title)
+                      .setItems(options) { _, which ->
+                          when (which) {
+                              0 -> renameItem(item)
+                              1 -> toggleItemLock(item)
+                              2 -> deleteItem(item)
+                          }
+                      }
+                      .show()
+              }
+
+              private fun toggleItemLock(item: ItemModel) {
+                  val newLockState = if (item.isLocked) 0 else 1
+                  val db = dbHelper.writableDatabase
+                  val cv = ContentValues().apply { put("is_locked", newLockState) }
+                  db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
+                  
+                  val itemType = if (item.isFolder) "Folder" else "Page"
+                  val msg = if (newLockState == 1) "🔒 $itemType successfully locked!" else "🔓 $itemType lock removed!"
+                  Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                  loadCurrentDirectoryItems()
+              }
+
+              private fun renameItem(item: ItemModel) {
+                  val input = EditText(this).apply { setText(item.title) }
+                  AlertDialog.Builder(this)
+                      .setTitle("Rename")
+                      .setView(input)
+                      .setPositiveButton("SHOW") { _, _ ->
+                          val newTitle = input.text.toString().ifEmpty { item.title }
+                          val db = dbHelper.writableDatabase
+                          val cv = ContentValues().apply { put("title", newTitle) }
+                          db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
+                          loadCurrentDirectoryItems()
+                      }
+                      .setNegativeButton("CANCEL", null)
+                      .show()
+              }
+
+              private fun deleteItem(item: ItemModel) {
+                  val db = dbHelper.writableDatabase
+                  db.delete("items", "id = ? OR parent_id = ?", arrayOf(item.id.toString(), item.id.toString()))
+                  loadCurrentDirectoryItems()
+                  updateMemoryUsage()
+              }
+
+              private fun saveCurrentNote() {
+                  if (isMemoryFull()) {
+                      showMemoryFullPopUp()
+                      return
+                  }
+
+                  val htmlContent = Html.toHtml(noteEditText.text, Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL)
+                  val title = projectTitleTv.text.toString()
+
+                  val db = dbHelper.writableDatabase
+                  if (editingNoteId == null) {
+                      val values = ContentValues().apply {
+                          put("title", title)
+                          put("content", htmlContent)
+                          put("is_folder", 0)
+                          put("parent_id", currentFolderId)
+                          put("is_locked", 0)
+                          put("is_editor_locked", 1)
+                      }
+                      editingNoteId = db.insert("items", null, values)
+                  } else {
+                      val cv = ContentValues().apply {
+                          put("title", title)
+                          put("content", htmlContent)
+                          put("is_editor_locked", 1)
+                      }
+                      db.update("items", cv, "id = ?", arrayOf(editingNoteId.toString()))
+                  }
+
+                  Toast.makeText(this, "Page saved successfully!", Toast.LENGTH_SHORT).show()
+                  closeEditor()
+                  loadCurrentDirectoryItems()
+                  updateMemoryUsage()
+              }
+
+              private fun openEditor(title: String, content: String) {
+                  dashboardHeader.visibility = View.GONE
+                  noticeListLayout.visibility = View.GONE
+                  projectHeader.visibility = View.VISIBLE
+                  editorLayout.visibility = View.VISIBLE
+                  projectTitleTv.text = title
+
+                  activeColor = Color.BLACK
+                  updateColorButtonUI()
+
+                  if (content.isNotEmpty()) {
+                      noteEditText.setText(Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY))
+                  } else {
+                      noteEditText.setText("")
+                  }
+
+                  isPageEditorLocked = true
+                  applyEditorLockUI()
+
+                  if (isMemoryFull()) {
+                      showMemoryFullPopUp()
+                  }
+              }
+
+              private fun closeEditor() {
+                  val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                  imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
+                  projectHeader.visibility = View.GONE
+                  editorLayout.visibility = View.GONE
+                  dashboardHeader.visibility = View.VISIBLE
+                  noticeListLayout.visibility = View.VISIBLE
+                  activeColor = Color.BLACK
+              }
+
+              private fun updateMemoryUsage() {
+                  Thread {
+                      val bytes = getJavaStorageUsageBytes()
+                      currentUsedBytesCached = bytes
+
+                      val kbUsed = bytes.toDouble() / 1024.0
+                      val mbUsed = kbUsed / 1024.0
+
+                      val memoryText = when {
+                          mbUsed >= 1.0 -> String.format("%.2f MB / 100 MB", mbUsed)
+                          else -> String.format("%.2f KB / 100 MB", kbUsed)
+                      }
+
+                      val fraction = (bytes.toDouble() / MAX_STORAGE_BYTES.toDouble()).coerceIn(0.0, 1.0)
+                      val targetWidth = (720 * fraction).toInt()
+
+                      runOnUiThread {
+                          drawerMemoryText.text = memoryText
+                          drawerProgressView.layoutParams = FrameLayout.LayoutParams(targetWidth, -1)
+                          
+                          val bgDrawable = drawerProgressView.background as GradientDrawable
+                          if (fraction >= 0.90) {
+                              bgDrawable.setColor(Color.parseColor("#E74C3C"))
+                          } else {
+                              bgDrawable.setColor(Color.parseColor("#2ECC71"))
+                          }
+                      }
+                  }.start()
+              }
+          }
+          EOF
+
+      # ==========================================
+      # STEP 8: Compilation & Output Generation
+      # ==========================================
+      - name: "Robot Step 19: Execute Gradle Assemble Debug APK"
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: "Robot Step 20: Upload Generated APK Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zeeshan-Notice-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+
