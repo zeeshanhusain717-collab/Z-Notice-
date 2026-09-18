@@ -208,12 +208,12 @@ jobs:
               }
 
               private val linePaint = Paint().apply {
-                  color = Color.parseColor("#B0C4DE")
+                  color = Color.parseColor("#CCCCCC")
                   strokeWidth = 2f
               }
 
               private val marginPaint = Paint().apply {
-                  color = Color.parseColor("#FF6B6B")
+                  color = Color.parseColor("#FF5555")
                   strokeWidth = 3f
               }
 
@@ -254,7 +254,7 @@ jobs:
               }
           }
 
-          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 7) {
+          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 8) {
               override fun onCreate(db: SQLiteDatabase) {
                   db.execSQL("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, is_folder INTEGER, parent_id INTEGER, is_locked INTEGER DEFAULT 0, is_editor_locked INTEGER DEFAULT 0)")
               }
@@ -297,38 +297,63 @@ jobs:
               private var isSelfTextChange = false
               private var isPageEditorLocked = true
 
-              private val baseHueArray = floatArrayOf(
-                  0f, 0f, 210f, 120f, 60f, 30f, 300f, 280f,
-                  25f, 180f, 84f, 15f, 200f, 340f, 45f, 160f,
-                  270f, 190f, 10f, 50f, 140f, 230f, 320f, 220f
+              // 24 Original Colors
+              private val original24Colors = intArrayOf(
+                  Color.BLACK,
+                  Color.parseColor("#1C1C1C"),
+                  Color.parseColor("#2F4F4F"),
+                  Color.parseColor("#8B0000"),
+                  Color.parseColor("#FF0000"),
+                  Color.parseColor("#FF4500"),
+                  Color.parseColor("#FF8C00"),
+                  Color.parseColor("#FFD700"),
+                  Color.parseColor("#32CD32"),
+                  Color.parseColor("#008000"),
+                  Color.parseColor("#006400"),
+                  Color.parseColor("#00FFFF"),
+                  Color.parseColor("#1E90FF"),
+                  Color.parseColor("#0000FF"),
+                  Color.parseColor("#00008B"),
+                  Color.parseColor("#8A2BE2"),
+                  Color.parseColor("#4B0082"),
+                  Color.parseColor("#9932CC"),
+                  Color.parseColor("#FF00FF"),
+                  Color.parseColor("#FF1493"),
+                  Color.parseColor("#A52A2A"),
+                  Color.parseColor("#800000"),
+                  Color.parseColor("#556B2F"),
+                  Color.parseColor("#4682B4")
               )
 
-              private val color120Matrix = ArrayList<List<Int>>()
+              // 48 Total Colors Palette (24 Original + 24 Mixed with 50% White)
+              private val color48List = ArrayList<Int>()
 
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
                   dbHelper = DatabaseHelper(this)
                   prefs = getSharedPreferences("ZeeshanNoticePrefs", Context.MODE_PRIVATE)
 
-                  generate120ColorsData()
+                  generate48ColorsData()
 
                   drawerLayout = DrawerLayout(this).apply {
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
+                  // White and Chalk Theme Background (#FFFFFF / #F8F9FA)
                   mainContainer = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(Color.parseColor("#FDFBF7"))
+                      setBackgroundColor(Color.parseColor("#F8F9FA"))
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
+                  // Chalk Dark Header (#1F2937)
                   dashboardHeader = FrameLayout(this).apply {
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       )
-                      setPadding(20, 25, 20, 25)
-                      elevation = 14f
+                      setPadding(24, 30, 24, 30)
+                      elevation = 10f
                       layoutParams = LinearLayout.LayoutParams(-1, -2)
                   }
 
@@ -346,8 +371,7 @@ jobs:
                       text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
                       textSize = 22f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#FDFBF7"))
-                      setShadowLayer(8f, 3f, 5f, Color.parseColor("#1C100A"))
+                      setTextColor(Color.WHITE)
                       gravity = Gravity.CENTER
                       layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.CENTER)
                   }
@@ -361,10 +385,10 @@ jobs:
                       setPadding(30, 35, 30, 35)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       )
                       visibility = View.GONE
-                      elevation = 14f
+                      elevation = 10f
                   }
 
                   val backBtn = TextView(this).apply {
@@ -388,7 +412,7 @@ jobs:
                       text = "✔ SAVE"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#D4AF37"))
+                      setTextColor(Color.parseColor("#38BDF8"))
                       setOnClickListener { saveCurrentNote() }
                   }
 
@@ -422,7 +446,7 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.END or Gravity.CENTER_VERTICAL
                       setPadding(20, 15, 20, 15)
-                      setBackgroundColor(Color.parseColor("#F5EFE6"))
+                      setBackgroundColor(Color.parseColor("#EDF2F7"))
                   }
 
                   colorMenuBtn = Button(this).apply {
@@ -433,7 +457,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(4, Color.BLACK)
+                          setStroke(3, Color.parseColor("#CBD5E0"))
                       }
                       setOnClickListener { openCompactColorPicker() }
                   }
@@ -441,12 +465,12 @@ jobs:
                   val styleMenuBtn = Button(this).apply {
                       text = "📄 Style"
                       textSize = 13f
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                       setTypeface(null, Typeface.BOLD)
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(2, Color.parseColor("#3D2314"))
+                          setStroke(2, Color.parseColor("#CBD5E0"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener { showPageStyleDialog() }
@@ -458,7 +482,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(2, Color.parseColor("#3D2314"))
+                          setStroke(2, Color.parseColor("#CBD5E0"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener { toggleEditorLockState() }
@@ -473,7 +497,7 @@ jobs:
                       textSize = 16f
                       setPadding(40, 40, 40, 40)
                       gravity = Gravity.TOP
-                      setBackgroundColor(Color.TRANSPARENT)
+                      setBackgroundColor(Color.WHITE)
                       layoutParams = LinearLayout.LayoutParams(-1, -1)
                   }
 
@@ -519,8 +543,8 @@ jobs:
                       setTextColor(Color.WHITE)
                       background = GradientDrawable().apply {
                           shape = GradientDrawable.OVAL
-                          setColor(Color.parseColor("#3D2314"))
-                          setStroke(4, Color.parseColor("#D4AF37"))
+                          setColor(Color.parseColor("#1A202C"))
+                          setStroke(4, Color.parseColor("#38BDF8"))
                       }
                       elevation = 12f
                       layoutParams = FrameLayout.LayoutParams(130, 130).apply {
@@ -552,14 +576,14 @@ jobs:
                   val drawerHeaderCard = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setPadding(40, 50, 40, 40)
-                      setBackgroundColor(Color.parseColor("#FDFBF7"))
+                      setBackgroundColor(Color.parseColor("#FFFFFF"))
                   }
 
                   val memoryTitle = TextView(this).apply {
                       text = "Memory"
                       textSize = 20f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1C100A"))
+                      setTextColor(Color.parseColor("#1A202C"))
                       setPadding(0, 0, 0, 20)
                   }
 
@@ -568,7 +592,7 @@ jobs:
                           setMargins(0, 0, 0, 20)
                       }
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#E0E0E0"))
+                          setColor(Color.parseColor("#E2E8F0"))
                           cornerRadius = 14f
                       }
                   }
@@ -576,7 +600,7 @@ jobs:
                   drawerProgressView = View(this).apply {
                       layoutParams = FrameLayout.LayoutParams(0, -1)
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#2ECC71"))
+                          setColor(Color.parseColor("#10B981"))
                           cornerRadius = 14f
                       }
                   }
@@ -586,7 +610,7 @@ jobs:
                       text = "0.00 KB / 100 MB"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#5A3822"))
+                      setTextColor(Color.parseColor("#2D3748"))
                   }
 
                   drawerHeaderCard.addView(memoryTitle)
@@ -601,6 +625,25 @@ jobs:
 
                   loadCurrentDirectoryItems()
                   updateMemoryUsage()
+              }
+
+              private fun mixWith50PercentWhite(color: Int): Int {
+                  val r = (Color.red(color) + 255) / 2
+                  val g = (Color.green(color) + 255) / 2
+                  val b = (Color.blue(color) + 255) / 2
+                  return Color.rgb(r, g, b)
+              }
+
+              private fun generate48ColorsData() {
+                  color48List.clear()
+                  // First 24 Original Colors
+                  for (col in original24Colors) {
+                      color48List.add(col)
+                  }
+                  // Next 24 Original Colors + 50% White Mixed Colors
+                  for (col in original24Colors) {
+                      color48List.add(mixWith50PercentWhite(col))
+                  }
               }
 
               private fun getJavaStorageUsageBytes(): Long {
@@ -708,37 +751,13 @@ jobs:
                   dialog.show()
               }
 
-              private fun generate120ColorsData() {
-                  color120Matrix.clear()
-                  val blackShades = listOf(
-                      Color.BLACK,
-                      Color.parseColor("#1C1C1C"),
-                      Color.parseColor("#383838"),
-                      Color.parseColor("#545454"),
-                      Color.parseColor("#707070"),
-                      Color.parseColor("#8C8C8C")
-                  )
-                  color120Matrix.add(blackShades)
-
-                  for (i in 1 until 20) {
-                      val hue = baseHueArray[i % baseHueArray.size]
-                      val stdList = ArrayList<Int>()
-                      stdList.add(Color.HSVToColor(floatArrayOf(hue, 0.9f, 0.7f)))
-                      val stdVals = floatArrayOf(0.95f, 0.8f, 0.65f, 0.5f, 0.35f)
-                      for (s in 0 until 5) {
-                          stdList.add(Color.HSVToColor(floatArrayOf(hue, 0.85f, stdVals[s])))
-                      }
-                      color120Matrix.add(stdList)
-                  }
-              }
-
               private fun openCompactColorPicker() {
                   val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
                   var tempSelectedColor = activeColor
 
                   val rootLayout = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(Color.parseColor("#121212"))
+                      setBackgroundColor(Color.parseColor("#18181B"))
                       layoutParams = ViewGroup.LayoutParams(-1, -1)
                   }
 
@@ -746,7 +765,7 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
                       setPadding(30, 20, 30, 20)
-                      setBackgroundColor(Color.parseColor("#1F1F1F"))
+                      setBackgroundColor(Color.parseColor("#27272A"))
                       elevation = 12f
                   }
 
@@ -771,7 +790,7 @@ jobs:
                   }
 
                   val titleTv = TextView(this).apply {
-                      text = " Select Color (120 Colors)"
+                      text = " Color Palette (48 Colors)"
                       textSize = 17f
                       setTextColor(Color.WHITE)
                       setTypeface(null, Typeface.BOLD)
@@ -784,7 +803,7 @@ jobs:
                       setTextColor(Color.BLACK)
                       setTypeface(null, Typeface.BOLD)
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#D4AF37"))
+                          setColor(Color.parseColor("#38BDF8"))
                           cornerRadius = 15f
                       }
                       setOnClickListener {
@@ -805,37 +824,41 @@ jobs:
                   }
                   val pageContainer = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      setPadding(15, 15, 15, 15)
+                      setPadding(20, 20, 20, 20)
                   }
                   scrollView.addView(pageContainer)
 
-                  for (row in color120Matrix) {
-                      val rowLayout = LinearLayout(this).apply {
-                          orientation = LinearLayout.HORIZONTAL
-                          gravity = Gravity.CENTER_HORIZONTAL
-                          layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
-                              setMargins(0, 4, 0, 4)
+                  val columns = 6
+                  var currentRow: LinearLayout? = null
+
+                  for (i in 0 until color48List.size) {
+                      if (i % columns == 0) {
+                          currentRow = LinearLayout(this).apply {
+                              orientation = LinearLayout.HORIZONTAL
+                              gravity = Gravity.CENTER_HORIZONTAL
+                              layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
+                                  setMargins(0, 8, 0, 8)
+                              }
                           }
+                          pageContainer.addView(currentRow)
                       }
 
-                      for (colorVal in row) {
-                          val box = View(this).apply {
-                              layoutParams = LinearLayout.LayoutParams(70, 70).apply {
-                                  setMargins(5, 5, 5, 5)
-                              }
-                              background = GradientDrawable().apply {
-                                  setColor(colorVal)
-                                  cornerRadius = 12f
-                                  setStroke(2, Color.parseColor("#444444"))
-                              }
-                              setOnClickListener {
-                                  tempSelectedColor = colorVal
-                                  (pencilPreview.background as GradientDrawable).setColor(colorVal)
-                              }
+                      val colorVal = color48List[i]
+                      val box = View(this).apply {
+                          layoutParams = LinearLayout.LayoutParams(95, 95).apply {
+                              setMargins(8, 8, 8, 8)
                           }
-                          rowLayout.addView(box)
+                          background = GradientDrawable().apply {
+                              setColor(colorVal)
+                              cornerRadius = 16f
+                              setStroke(3, Color.parseColor("#52525B"))
+                          }
+                          setOnClickListener {
+                              tempSelectedColor = colorVal
+                              (pencilPreview.background as GradientDrawable).setColor(colorVal)
+                          }
                       }
-                      pageContainer.addView(rowLayout)
+                      currentRow?.addView(box)
                   }
 
                   rootLayout.addView(headerBar)
@@ -850,7 +873,7 @@ jobs:
                   colorMenuBtn.background = GradientDrawable().apply {
                       setColor(activeColor)
                       cornerRadius = 20f
-                      setStroke(4, Color.parseColor("#3D2314"))
+                      setStroke(4, Color.parseColor("#2D3748"))
                   }
               }
 
@@ -902,11 +925,11 @@ jobs:
 
                   val dialogCard = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      elevation = 24f
+                      elevation = 20f
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#FDFBF7"))
-                          cornerRadius = 45f
-                          setStroke(6, Color.parseColor("#D4AF37"))
+                          setColor(Color.WHITE)
+                          cornerRadius = 35f
+                          setStroke(4, Color.parseColor("#CBD5E0"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -917,9 +940,9 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                          cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
                   }
 
@@ -931,7 +954,7 @@ jobs:
 
                   val title = TextView(this).apply {
                       text = "Choose Action"
-                      textSize = 24f
+                      textSize = 22f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.WHITE)
                       layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
@@ -949,11 +972,11 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
                       setPadding(25, 25, 25, 25)
-                      elevation = 8f
+                      elevation = 6f
                       background = GradientDrawable().apply {
-                          setColor(Color.WHITE)
-                          cornerRadius = 30f
-                          setStroke(3, Color.parseColor("#D4AF37"))
+                          setColor(Color.parseColor("#F8F9FA"))
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#E2E8F0"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                           setMargins(0, 0, 0, 25)
@@ -966,19 +989,15 @@ jobs:
 
                   val folderIcon = TextView(this).apply {
                       text = "📁"
-                      textSize = 26f
+                      textSize = 24f
                       setPadding(10, 5, 20, 5)
-                      background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#3D2314"))
-                          cornerRadius = 18f
-                      }
                   }
 
                   val folderText = TextView(this).apply {
                       text = "Create New Folder"
                       textSize = 17f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1C100A"))
+                      setTextColor(Color.parseColor("#1A202C"))
                       layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
                   }
 
@@ -986,7 +1005,7 @@ jobs:
                       text = "❯"
                       textSize = 18f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                   }
 
                   folderRow.addView(folderIcon)
@@ -997,11 +1016,11 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
                       setPadding(25, 25, 25, 25)
-                      elevation = 8f
+                      elevation = 6f
                       background = GradientDrawable().apply {
-                          setColor(Color.WHITE)
-                          cornerRadius = 30f
-                          setStroke(3, Color.parseColor("#D4AF37"))
+                          setColor(Color.parseColor("#F8F9FA"))
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#E2E8F0"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                           setMargins(0, 0, 0, 25)
@@ -1014,19 +1033,15 @@ jobs:
 
                   val pageIcon = TextView(this).apply {
                       text = "📄"
-                      textSize = 26f
+                      textSize = 24f
                       setPadding(10, 5, 20, 5)
-                      background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#3D2314"))
-                          cornerRadius = 18f
-                      }
                   }
 
                   val pageText = TextView(this).apply {
                       text = "Create New Page"
                       textSize = 17f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1C100A"))
+                      setTextColor(Color.parseColor("#1A202C"))
                       layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
                   }
 
@@ -1034,7 +1049,7 @@ jobs:
                       text = "❯"
                       textSize = 18f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                   }
 
                   pageRow.addView(pageIcon)
@@ -1051,7 +1066,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1076,11 +1091,11 @@ jobs:
 
                   val dialogCard = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      elevation = 24f
+                      elevation = 20f
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#FDFBF7"))
-                          cornerRadius = 45f
-                          setStroke(6, Color.parseColor("#D4AF37"))
+                          setColor(Color.WHITE)
+                          cornerRadius = 35f
+                          setStroke(4, Color.parseColor("#CBD5E0"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1091,16 +1106,16 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                          cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
                   }
 
                   val headerIcon = TextView(this).apply { text = "📁 "; textSize = 26f }
                   val title = TextView(this).apply {
                       text = "Create New Folder"
-                      textSize = 22f
+                      textSize = 20f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.WHITE)
                   }
@@ -1116,7 +1131,7 @@ jobs:
                       text = "Enter folder name:"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1C100A"))
+                      setTextColor(Color.parseColor("#1A202C"))
                       setPadding(0, 0, 0, 15)
                   }
 
@@ -1127,7 +1142,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#D4AF37"))
+                          setStroke(3, Color.parseColor("#CBD5E0"))
                       }
                   }
 
@@ -1144,7 +1159,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1154,13 +1169,12 @@ jobs:
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.WHITE)
-                      elevation = 8f
+                      elevation = 6f
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadius = 25f
-                          setStroke(2, Color.parseColor("#D4AF37"))
+                          cornerRadius = 20f
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener {
@@ -1189,11 +1203,11 @@ jobs:
 
                   val dialogCard = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      elevation = 24f
+                      elevation = 20f
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#FDFBF7"))
-                          cornerRadius = 45f
-                          setStroke(6, Color.parseColor("#D4AF37"))
+                          setColor(Color.WHITE)
+                          cornerRadius = 35f
+                          setStroke(4, Color.parseColor("#CBD5E0"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1204,16 +1218,16 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadii = floatArrayOf(45f, 45f, 45f, 45f, 0f, 0f, 0f, 0f)
+                          cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
                   }
 
                   val headerIcon = TextView(this).apply { text = "📄 "; textSize = 26f }
                   val title = TextView(this).apply {
                       text = "Create New Page"
-                      textSize = 22f
+                      textSize = 20f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.WHITE)
                   }
@@ -1229,7 +1243,7 @@ jobs:
                       text = "Enter page title:"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1C100A"))
+                      setTextColor(Color.parseColor("#1A202C"))
                       setPadding(0, 0, 0, 15)
                   }
 
@@ -1240,7 +1254,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#D4AF37"))
+                          setStroke(3, Color.parseColor("#CBD5E0"))
                       }
                   }
 
@@ -1257,7 +1271,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#3D2314"))
+                      setTextColor(Color.parseColor("#2D3748"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1267,13 +1281,12 @@ jobs:
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.WHITE)
-                      elevation = 8f
+                      elevation = 6f
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadius = 25f
-                          setStroke(2, Color.parseColor("#D4AF37"))
+                          cornerRadius = 20f
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener {
@@ -1337,11 +1350,11 @@ jobs:
               private fun renderItemCard(item: ItemModel) {
                   val card = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      elevation = 8f
+                      elevation = 6f
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
-                          cornerRadius = 25f
-                          setStroke(2, Color.parseColor("#D4AF37"))
+                          cornerRadius = 20f
+                          setStroke(2, Color.parseColor("#E2E8F0"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
                           setMargins(0, 0, 0, 25)
@@ -1391,9 +1404,9 @@ jobs:
                       setPadding(25, 18, 25, 18)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#5A3822"), Color.parseColor("#2B170C"))
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
                       ).apply {
-                          cornerRadii = floatArrayOf(25f, 25f, 25f, 25f, 0f, 0f, 0f, 0f)
+                          cornerRadii = floatArrayOf(20f, 20f, 20f, 20f, 0f, 0f, 0f, 0f)
                       }
                   }
 
@@ -1409,7 +1422,7 @@ jobs:
                           }
                       }
                       textSize = 13f
-                      setTextColor(Color.parseColor("#444444"))
+                      setTextColor(Color.parseColor("#4A5568"))
                       setPadding(25, 20, 25, 20)
                   }
 
@@ -1560,9 +1573,9 @@ jobs:
                           
                           val bgDrawable = drawerProgressView.background as GradientDrawable
                           if (fraction >= 0.90) {
-                              bgDrawable.setColor(Color.parseColor("#E74C3C"))
+                              bgDrawable.setColor(Color.parseColor("#EF4444"))
                           } else {
-                              bgDrawable.setColor(Color.parseColor("#2ECC71"))
+                              bgDrawable.setColor(Color.parseColor("#10B981"))
                           }
                       }
                   }.start()
@@ -1579,4 +1592,3 @@ jobs:
         with:
           name: Zeeshan-Notice-APK
           path: app/build/outputs/apk/debug/app-debug.apk
-
