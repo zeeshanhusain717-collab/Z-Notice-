@@ -1,4 +1,4 @@
-Name: Build Zeeshan Notice App APK
+name: Build Zeeshan Notice App APK
 
 on:
   push:
