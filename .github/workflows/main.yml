@@ -153,12 +153,11 @@ jobs:
                   </aapt:attr>
               </path>
 
-              <!-- Leather Stitches -->
+              <!-- Leather Stitches (Fixed stroke) -->
               <path
                   android:pathData="M 75,55 L 425,55 M 425,55 L 425,445 M 425,445 L 75,445 M 75,445 L 75,55"
                   android:strokeColor="#C89662"
-                  android:strokeWidth="2"
-                  android:strokeDasharray="8,6" />
+                  android:strokeWidth="2" />
 
               <!-- Notebook Page -->
               <path
@@ -218,7 +217,7 @@ jobs:
           </vector>
           EOF
 
-          # AndroidManifest.xml (With Icon Attached)
+          # AndroidManifest.xml
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -1728,4 +1727,3 @@ jobs:
         with:
           name: Zeeshan-Notice-APK
           path: app/build/outputs/apk/debug/app-debug.apk
-
