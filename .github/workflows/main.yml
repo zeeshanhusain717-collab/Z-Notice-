@@ -267,8 +267,6 @@ jobs:
           import android.text.TextWatcher
           import android.text.style.ForegroundColorSpan
           import android.view.Gravity
-          import android.view.MotionEvent
-          import android.view.ScaleGestureDetector
           import android.view.View
           import android.view.ViewGroup
           import android.view.Window
@@ -298,73 +296,42 @@ jobs:
                       invalidate()
                   }
 
-              private var scaleFactor = 1.0f
-              private val baseTextSizeSp = 16f
-
-              private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                  override fun onScale(detector: ScaleGestureDetector): Boolean {
-                      scaleFactor *= detector.scaleFactor
-                      scaleFactor = scaleFactor.coerceIn(1.0f, 6.0f)
-                      textSize = baseTextSizeSp * scaleFactor
-                      return true
-                  }
-              })
-
-              override fun onTouchEvent(event: MotionEvent): Boolean {
-                  if (!isFocusable) {
-                      scaleDetector.onTouchEvent(event)
-                  }
-                  return super.onTouchEvent(event)
-              }
-
               private val linePaint = Paint().apply {
                   color = Color.parseColor("#CCCCCC")
                   strokeWidth = 2f
               }
 
-              private val marginPaint = Paint().apply {
-                  color = Color.parseColor("#FF5555")
-                  strokeWidth = 3f
-              }
-
               override fun onDraw(canvas: Canvas) {
+                  val lineH = lineHeight
+                  val totalH = Math.max(height, computeVerticalScrollRange())
+                  val count = totalH / lineH
+
                   when (pageStyle) {
                       "Ruled" -> {
-                          val lineH = lineHeight
-                          val count = height / lineH
                           for (i in 1..count) {
                               val y = (i * lineH).toFloat()
                               canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
                           }
                       }
                       "Grid" -> {
-                          val step = 60f
+                          val step = lineH.toFloat()
                           var x = 0f
                           while (x < width) {
-                              canvas.drawLine(x, 0f, x, height.toFloat(), linePaint)
+                              canvas.drawLine(x, 0f, x, totalH.toFloat(), linePaint)
                               x += step
                           }
                           var y = 0f
-                          while (y < height) {
+                          while (y < totalH) {
                               canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
                               y += step
                           }
-                      }
-                      "Vertical" -> {
-                          val lineH = lineHeight
-                          val count = height / lineH
-                          for (i in 1..count) {
-                              val y = (i * lineH).toFloat()
-                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
-                          }
-                          canvas.drawLine(90f, 0f, 90f, height.toFloat(), marginPaint)
                       }
                   }
                   super.onDraw(canvas)
               }
           }
 
-          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 8) {
+          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 9) {
               override fun onCreate(db: SQLiteDatabase) {
                   db.execSQL("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, is_folder INTEGER, parent_id INTEGER, is_locked INTEGER DEFAULT 0, is_editor_locked INTEGER DEFAULT 0)")
               }
@@ -449,14 +416,14 @@ jobs:
 
                   mainContainer = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(Color.parseColor("#F8F9FA"))
+                      setBackgroundColor(Color.parseColor("#FDFBF7"))
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
                   dashboardHeader = FrameLayout(this).apply {
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       )
                       setPadding(24, 30, 24, 30)
                       elevation = 10f
@@ -491,7 +458,7 @@ jobs:
                       setPadding(30, 35, 30, 35)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       )
                       visibility = View.GONE
                       elevation = 10f
@@ -518,7 +485,7 @@ jobs:
                       text = "✔ SAVE"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#38BDF8"))
+                      setTextColor(Color.parseColor("#FFD700"))
                       setOnClickListener { saveCurrentNote() }
                   }
 
@@ -552,7 +519,7 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.END or Gravity.CENTER_VERTICAL
                       setPadding(20, 15, 20, 15)
-                      setBackgroundColor(Color.parseColor("#EDF2F7"))
+                      setBackgroundColor(Color.parseColor("#F5F2EB"))
                   }
 
                   colorMenuBtn = Button(this).apply {
@@ -563,7 +530,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#CBD5E0"))
+                          setStroke(3, Color.parseColor("#C89662"))
                       }
                       setOnClickListener { openCompactColorPicker() }
                   }
@@ -571,12 +538,12 @@ jobs:
                   val styleMenuBtn = Button(this).apply {
                       text = "📄 Style"
                       textSize = 13f
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setTypeface(null, Typeface.BOLD)
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(2, Color.parseColor("#CBD5E0"))
+                          setStroke(2, Color.parseColor("#C89662"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener { showPageStyleDialog() }
@@ -588,7 +555,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(2, Color.parseColor("#CBD5E0"))
+                          setStroke(2, Color.parseColor("#C89662"))
                       }
                       layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
                       setOnClickListener { toggleEditorLockState() }
@@ -599,7 +566,7 @@ jobs:
                   styleToolBar.addView(lockToggleBtn)
 
                   noteEditText = DynamicCanvasEditText(this).apply {
-                      hint = "Write your notice here..."
+                      hint = "Write or paste your notice here..."
                       textSize = 16f
                       setPadding(40, 40, 40, 40)
                       gravity = Gravity.TOP
@@ -654,8 +621,8 @@ jobs:
                       setTextColor(Color.WHITE)
                       background = GradientDrawable().apply {
                           shape = GradientDrawable.OVAL
-                          setColor(Color.parseColor("#1A202C"))
-                          setStroke(4, Color.parseColor("#38BDF8"))
+                          setColor(Color.parseColor("#4E2A1E"))
+                          setStroke(4, Color.parseColor("#FFD700"))
                       }
                       elevation = 12f
                       layoutParams = FrameLayout.LayoutParams(130, 130).apply {
@@ -694,7 +661,7 @@ jobs:
                       text = "Memory"
                       textSize = 20f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(0, 0, 0, 20)
                   }
 
@@ -711,7 +678,7 @@ jobs:
                   drawerProgressView = View(this).apply {
                       layoutParams = FrameLayout.LayoutParams(0, -1)
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#10B981"))
+                          setColor(Color.parseColor("#4E2A1E"))
                           cornerRadius = 14f
                       }
                   }
@@ -721,7 +688,7 @@ jobs:
                       text = "0.00 KB / 100 MB"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#361B12"))
                   }
 
                   drawerHeaderCard.addView(memoryTitle)
@@ -817,7 +784,7 @@ jobs:
                       val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                       imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
                       if (!isMemoryFull()) {
-                          Toast.makeText(this, "🔒 Page Locked (6x Zoom Active)", Toast.LENGTH_SHORT).show()
+                          Toast.makeText(this, "🔒 Page Locked (Scroll & View Active)", Toast.LENGTH_SHORT).show()
                       }
                   } else {
                       lockToggleBtn.text = "🔓"
@@ -874,7 +841,7 @@ jobs:
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
                       setPadding(30, 20, 30, 20)
-                      setBackgroundColor(Color.parseColor("#27272A"))
+                      setBackgroundColor(Color.parseColor("#361B12"))
                       elevation = 12f
                   }
 
@@ -912,7 +879,7 @@ jobs:
                       setTextColor(Color.BLACK)
                       setTypeface(null, Typeface.BOLD)
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#38BDF8"))
+                          setColor(Color.parseColor("#FFD700"))
                           cornerRadius = 15f
                       }
                       setOnClickListener {
@@ -982,7 +949,7 @@ jobs:
                   colorMenuBtn.background = GradientDrawable().apply {
                       setColor(activeColor)
                       cornerRadius = 20f
-                      setStroke(4, Color.parseColor("#2D3748"))
+                      setStroke(4, Color.parseColor("#4E2A1E"))
                   }
               }
 
@@ -995,10 +962,9 @@ jobs:
                   val options = arrayOf(
                       "📄 1. Plain Page",
                       "📝 2. Ruled Lines",
-                      "🔲 3. Grid / Box Style",
-                      "📑 4. Vertical Margin Line"
+                      "🔲 3. Grid / Box Style"
                   )
-                  val keys = arrayOf("Plain", "Ruled", "Grid", "Vertical")
+                  val keys = arrayOf("Plain", "Ruled", "Grid")
 
                   selectedStyleTemp = noteEditText.pageStyle
 
@@ -1038,7 +1004,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 35f
-                          setStroke(4, Color.parseColor("#CBD5E0"))
+                          setStroke(4, Color.parseColor("#C89662"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1049,7 +1015,7 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
@@ -1106,7 +1072,7 @@ jobs:
                       text = "Create New Folder"
                       textSize = 17f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                       layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
                   }
 
@@ -1114,7 +1080,7 @@ jobs:
                       text = "❯"
                       textSize = 18f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                   }
 
                   folderRow.addView(folderIcon)
@@ -1150,7 +1116,7 @@ jobs:
                       text = "Create New Page"
                       textSize = 17f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                       layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
                   }
 
@@ -1158,7 +1124,7 @@ jobs:
                       text = "❯"
                       textSize = 18f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                   }
 
                   pageRow.addView(pageIcon)
@@ -1175,7 +1141,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1204,7 +1170,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 35f
-                          setStroke(4, Color.parseColor("#CBD5E0"))
+                          setStroke(4, Color.parseColor("#C89662"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1215,7 +1181,7 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
@@ -1240,7 +1206,7 @@ jobs:
                       text = "Enter folder name:"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                       setPadding(0, 0, 0, 15)
                   }
 
@@ -1251,7 +1217,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#CBD5E0"))
+                          setStroke(3, Color.parseColor("#C89662"))
                       }
                   }
 
@@ -1268,7 +1234,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1281,7 +1247,7 @@ jobs:
                       elevation = 6f
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadius = 20f
                       }
@@ -1316,7 +1282,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 35f
-                          setStroke(4, Color.parseColor("#CBD5E0"))
+                          setStroke(4, Color.parseColor("#C89662"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1327,7 +1293,7 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
@@ -1352,7 +1318,7 @@ jobs:
                       text = "Enter page title:"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                       setPadding(0, 0, 0, 15)
                   }
 
@@ -1363,7 +1329,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#CBD5E0"))
+                          setStroke(3, Color.parseColor("#C89662"))
                       }
                   }
 
@@ -1380,7 +1346,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1393,7 +1359,7 @@ jobs:
                       elevation = 6f
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadius = 20f
                       }
@@ -1513,7 +1479,7 @@ jobs:
                       setPadding(25, 18, 25, 18)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(20f, 20f, 20f, 20f, 0f, 0f, 0f, 0f)
                       }
@@ -1540,7 +1506,6 @@ jobs:
                   noticeListLayout.addView(card)
               }
 
-              // 3D Custom Option Dialog
               private fun showOptionMenu(item: ItemModel) {
                   val dialog = Dialog(this)
                   dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -1552,7 +1517,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 35f
-                          setStroke(4, Color.parseColor("#CBD5E0"))
+                          setStroke(4, Color.parseColor("#C89662"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1563,7 +1528,7 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
@@ -1590,7 +1555,6 @@ jobs:
                       setPadding(30, 35, 30, 20)
                   }
 
-                  // Rename Row
                   val renameRow = LinearLayout(this).apply {
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
@@ -1612,12 +1576,11 @@ jobs:
                       text = "Rename"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                   }
                   renameRow.addView(renameIcon)
                   renameRow.addView(renameText)
 
-                  // Password Lock Row
                   val lockRow = LinearLayout(this).apply {
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
@@ -1643,12 +1606,11 @@ jobs:
                       text = if (item.isLocked) "Remove Password" else "Add Password"
                       textSize = 16f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#1A202C"))
+                      setTextColor(Color.parseColor("#361B12"))
                   }
                   lockRow.addView(lockIcon)
                   lockRow.addView(lockText)
 
-                  // Delete Row
                   val deleteRow = LinearLayout(this).apply {
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
@@ -1685,7 +1647,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1716,7 +1678,6 @@ jobs:
                   loadCurrentDirectoryItems()
               }
 
-              // 3D Custom Rename Dialog
               private fun renameItem(item: ItemModel) {
                   val dialog = Dialog(this)
                   dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -1728,7 +1689,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 35f
-                          setStroke(4, Color.parseColor("#CBD5E0"))
+                          setStroke(4, Color.parseColor("#C89662"))
                       }
                       layoutParams = ViewGroup.LayoutParams(850, -2)
                   }
@@ -1739,7 +1700,7 @@ jobs:
                       setPadding(35, 30, 35, 30)
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
                       }
@@ -1772,7 +1733,7 @@ jobs:
                       background = GradientDrawable().apply {
                           setColor(Color.WHITE)
                           cornerRadius = 20f
-                          setStroke(3, Color.parseColor("#CBD5E0"))
+                          setStroke(3, Color.parseColor("#C89662"))
                       }
                   }
 
@@ -1788,7 +1749,7 @@ jobs:
                       text = "CANCEL"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
-                      setTextColor(Color.parseColor("#2D3748"))
+                      setTextColor(Color.parseColor("#4E2A1E"))
                       setPadding(30, 15, 30, 15)
                       setOnClickListener { dialog.dismiss() }
                   }
@@ -1801,7 +1762,7 @@ jobs:
                       elevation = 6f
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
-                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                          intArrayOf(Color.parseColor("#4E2A1E"), Color.parseColor("#361B12"))
                       ).apply {
                           cornerRadius = 20f
                       }
@@ -1934,7 +1895,7 @@ jobs:
                           if (fraction >= 0.90) {
                               bgDrawable.setColor(Color.parseColor("#EF4444"))
                           } else {
-                              bgDrawable.setColor(Color.parseColor("#10B981"))
+                              bgDrawable.setColor(Color.parseColor("#4E2A1E"))
                           }
                       }
                   }.start()
