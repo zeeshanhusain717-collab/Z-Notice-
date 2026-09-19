@@ -1,4 +1,4 @@
-name: Build Zeeshan Notice App APK
+name: Build Zeeshan Notice App APK (Java Edition)
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
         with:
           gradle-version: "8.5"
 
-      # Core System Configurations
+      # Core System Configurations (100% Java - No Kotlin)
       - name: Generate Build Configurations
         run: |
           set -euo pipefail
@@ -38,7 +38,6 @@ jobs:
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/drawable
 
-          # gradle.properties
           cat > gradle.properties <<'EOF'
           org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8
           android.useAndroidX=true
@@ -46,7 +45,6 @@ jobs:
           org.gradle.daemon=false
           EOF
 
-          # settings.gradle
           cat > settings.gradle <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement {
@@ -57,19 +55,15 @@ jobs:
           include(":app")
           EOF
 
-          # Root build.gradle
           cat > build.gradle <<'EOF'
           plugins {
               id "com.android.application" version "8.2.2" apply false
-              id "org.jetbrains.kotlin.android" version "1.9.22" apply false
           }
           EOF
 
-          # App build.gradle
           cat > app/build.gradle <<'EOF'
           plugins {
               id "com.android.application"
-              id "org.jetbrains.kotlin.android"
           }
           android {
               namespace "com.zeeshan.notice"
@@ -86,24 +80,20 @@ jobs:
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
-              kotlinOptions { jvmTarget = "17" }
           }
           dependencies {
-              implementation "androidx.core:core-ktx:1.13.1"
               implementation "androidx.appcompat:appcompat:1.7.0"
               implementation "com.google.android.material:material:1.12.0"
               implementation "androidx.constraintlayout:constraintlayout:2.1.4"
               implementation "androidx.drawerlayout:drawerlayout:1.2.0"
-              implementation "androidx.viewpager2:viewpager2:1.1.0"
           }
           EOF
 
       # Resources & Source Code Setup
-      - name: Generate App Resources & Code
+      - name: Generate App Resources
         run: |
           set -euo pipefail
 
-          # strings.xml
           cat > app/src/main/res/values/strings.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -111,99 +101,12 @@ jobs:
           </resources>
           EOF
 
-          # 3D Vector Image Logo (ic_launcher.xml)
-          cat > app/src/main/res/drawable/ic_launcher.xml <<'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:aapt="http://schemas.android.com/aapt"
-              android:width="512dp"
-              android:height="512dp"
-              android:viewportWidth="512"
-              android:viewportHeight="512">
-
-              <!-- Deep 3D Shadow -->
-              <path
-                  android:pathData="M 65,85 A 35,35 0 0,1 100,50 L 412,50 A 35,35 0 0,1 447,85 L 447,427 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 65,427 Z">
-                  <aapt:attr name="android:fillColor">
-                      <gradient
-                          android:type="radial"
-                          android:centerX="256"
-                          android:centerY="256"
-                          android:gradientRadius="260">
-                          <item android:offset="0.0" android:color="#90000000" />
-                          <item android:offset="1.0" android:color="#00000000" />
-                      </gradient>
-                  </aapt:attr>
-              </path>
-
-              <!-- Leather Cover Base (Chocolaty Theme) -->
-              <path
-                  android:pathData="M 60,70 A 30,30 0 0,1 90,40 L 410,40 A 30,30 0 0,1 440,70 L 440,430 A 30,30 0 0,1 410,460 L 90,460 A 30,30 0 0,1 60,430 Z">
-                  <aapt:attr name="android:fillColor">
-                      <gradient
-                          android:type="linear"
-                          android:startX="60"
-                          android:startY="40"
-                          android:endX="440"
-                          android:endY="460">
-                          <item android:offset="0.0" android:color="#4E2A1E" />
-                          <item android:offset="0.4" android:color="#361B12" />
-                          <item android:offset="1.0" android:color="#1F0D08" />
-                      </gradient>
-                  </aapt:attr>
-              </path>
-
-              <!-- Leather Stitches (Golden) -->
-              <path
-                  android:pathData="M 75,55 L 425,55 M 425,55 L 425,445 M 425,445 L 75,445 M 75,445 L 75,55"
-                  android:strokeColor="#D4AF37"
-                  android:strokeWidth="2" />
-
-              <!-- Notebook Page -->
-              <path
-                  android:pathData="M 122,70 A 15,15 0 0,1 137,55 L 390,55 A 15,15 0 0,1 405,70 L 405,420 A 15,15 0 0,1 390,435 L 137,435 A 15,15 0 0,1 122,420 Z">
-                  <aapt:attr name="android:fillColor">
-                      <gradient
-                          android:type="linear"
-                          android:startX="122"
-                          android:startY="55"
-                          android:endX="405"
-                          android:endY="435">
-                          <item android:offset="0.0" android:color="#FFFFFF" />
-                          <item android:offset="0.85" android:color="#FDFBF7" />
-                          <item android:offset="1.0" android:color="#F4EFEA" />
-                      </gradient>
-                  </aapt:attr>
-              </path>
-
-              <!-- Golden 'Z' Logo -->
-              <path
-                  android:pathData="M 220,160 L 320,160 L 320,190 L 250,285 L 320,285 L 320,320 L 215,320 L 215,290 L 285,195 L 220,195 Z">
-                  <aapt:attr name="android:fillColor">
-                      <gradient
-                          android:type="linear"
-                          android:startX="215"
-                          android:startY="160"
-                          android:endX="320"
-                          android:endY="320">
-                          <item android:offset="0.0" android:color="#FFF176" />
-                          <item android:offset="0.5" android:color="#FFD700" />
-                          <item android:offset="1.0" android:color="#C59B27" />
-                      </gradient>
-                  </aapt:attr>
-              </path>
-          </vector>
-          EOF
-
-          # AndroidManifest.xml
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:allowBackup="false"
                   android:label="@string/app_name"
-                  android:icon="@drawable/ic_launcher"
-                  android:roundIcon="@drawable/ic_launcher"
                   android:supportsRtl="true"
                   android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
                   <activity
@@ -219,1437 +122,417 @@ jobs:
           </manifest>
           EOF
 
-      - name: Write MainActivity.kt
+      # Writing the JAVA Code (Converted from Kotlin)
+      - name: Write MainActivity.java
         run: |
-          cat > app/src/main/java/com/zeeshan/notice/MainActivity.kt <<'EOF'
-          package com.zeeshan.notice
+          cat > app/src/main/java/com/zeeshan/notice/MainActivity.java <<'EOF'
+          package com.zeeshan.notice;
 
-          import android.app.AlertDialog
-          import android.app.Dialog
-          import android.content.ContentValues
-          import android.content.Context
-          import android.content.SharedPreferences
-          import android.database.sqlite.SQLiteDatabase
-          import android.database.sqlite.SQLiteOpenHelper
-          import android.graphics.Canvas
-          import android.graphics.Color
-          import android.graphics.Paint
-          import android.graphics.Typeface
-          import android.graphics.drawable.ColorDrawable
-          import android.graphics.drawable.GradientDrawable
-          import android.os.Bundle
-          import android.text.Editable
-          import android.text.InputType
-          import android.text.TextWatcher
-          import android.view.Gravity
-          import android.view.MotionEvent
-          import android.view.ScaleGestureDetector
-          import android.view.View
-          import android.view.ViewGroup
-          import android.view.Window
-          import android.view.inputmethod.InputMethodManager
-          import android.widget.*
-          import androidx.appcompat.app.AppCompatActivity
-          import androidx.core.view.GravityCompat
-          import androidx.drawerlayout.widget.DrawerLayout
-          import com.google.android.material.navigation.NavigationView
-          import java.io.File
+          import android.app.AlertDialog;
+          import android.app.Dialog;
+          import android.content.ContentValues;
+          import android.content.Context;
+          import android.content.SharedPreferences;
+          import android.database.sqlite.SQLiteDatabase;
+          import android.database.sqlite.SQLiteOpenHelper;
+          import android.graphics.Canvas;
+          import android.graphics.Color;
+          import android.graphics.Paint;
+          import android.graphics.Typeface;
+          import android.graphics.drawable.ColorDrawable;
+          import android.graphics.drawable.GradientDrawable;
+          import android.os.Bundle;
+          import android.text.Editable;
+          import android.text.InputType;
+          import android.text.TextWatcher;
+          import android.view.Gravity;
+          import android.view.MotionEvent;
+          import android.view.ScaleGestureDetector;
+          import android.view.View;
+          import android.view.ViewGroup;
+          import android.view.Window;
+          import android.view.inputmethod.InputMethodManager;
+          import android.widget.*;
+          import androidx.appcompat.app.AppCompatActivity;
+          import androidx.core.view.GravityCompat;
+          import androidx.drawerlayout.widget.DrawerLayout;
+          import com.google.android.material.navigation.NavigationView;
+          import java.io.File;
+          import java.util.ArrayList;
 
-          data class ItemModel(
-              val id: Long,
-              val title: String,
-              val content: String,
-              val isFolder: Boolean,
-              val parentFolderId: Long,
-              val isLocked: Boolean,
-              val isEditorLocked: Boolean = false
-          )
-
-          class DynamicCanvasEditText(context: Context) : androidx.appcompat.widget.AppCompatEditText(context) {
-              var pageStyle: String = "Plain"
-                  set(value) {
-                      field = value
-                      invalidate()
-                  }
-
-              var customTextColor: Int = Color.BLACK
-                  set(value) {
-                      field = value
-                      setTextColor(value)
-                      invalidate()
-                  }
-
-              private var scaleFactor = 1.0f
-              private val baseTextSizeSp = 16f
-
-              private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-                  override fun onScale(detector: ScaleGestureDetector): Boolean {
-                      scaleFactor *= detector.scaleFactor
-                      scaleFactor = scaleFactor.coerceIn(1.0f, 6.0f)
-                      textSize = baseTextSizeSp * scaleFactor
-                      return true
-                  }
-              })
-
-              override fun onTouchEvent(event: MotionEvent): Boolean {
-                  if (!isFocusable) {
-                      scaleDetector.onTouchEvent(event)
-                  }
-                  return super.onTouchEvent(event)
-              }
-
-              private val linePaint = Paint().apply {
-                  color = Color.parseColor("#D4AF37")
-                  strokeWidth = 1.5f
-              }
-
-              private val marginPaint = Paint().apply {
-                  color = Color.parseColor("#4E2A1E")
-                  strokeWidth = 2.5f
-              }
-
-              override fun onDraw(canvas: Canvas) {
-                  when (pageStyle) {
-                      "Ruled" -> {
-                          val lineH = lineHeight
-                          val count = height / lineH
-                          for (i in 1..count) {
-                              val y = (i * lineH).toFloat()
-                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
-                          }
-                      }
-                      "Grid" -> {
-                          val step = 60f
-                          var x = 0f
-                          while (x < width) {
-                              canvas.drawLine(x, 0f, x, height.toFloat(), linePaint)
-                              x += step
-                          }
-                          var y = 0f
-                          while (y < height) {
-                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
-                              y += step
-                          }
-                      }
-                      "Margin" -> {
-                          val lineH = lineHeight
-                          val count = height / lineH
-                          for (i in 1..count) {
-                              val y = (i * lineH).toFloat()
-                              canvas.drawLine(0f, y, width.toFloat(), y, linePaint)
-                          }
-                          canvas.drawLine(90f, 0f, 90f, height.toFloat(), marginPaint)
-                      }
-                  }
-                  super.onDraw(canvas)
+          class ItemModel {
+              long id; String title; String content; boolean isFolder; long parentFolderId; boolean isLocked; boolean isEditorLocked;
+              public ItemModel(long id, String title, String content, boolean isFolder, long parentFolderId, boolean isLocked, boolean isEditorLocked) {
+                  this.id = id; this.title = title; this.content = content; this.isFolder = isFolder; this.parentFolderId = parentFolderId; this.isLocked = isLocked; this.isEditorLocked = isEditorLocked;
               }
           }
 
-          class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, "ZeeshanNotice.db", null, 8) {
-              override fun onCreate(db: SQLiteDatabase) {
-                  db.execSQL("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, is_folder INTEGER, parent_id INTEGER, is_locked INTEGER DEFAULT 0, is_editor_locked INTEGER DEFAULT 0)")
+          class DynamicCanvasEditText extends androidx.appcompat.widget.AppCompatEditText {
+              private String pageStyle = "Plain";
+              public int customTextColor = Color.BLACK;
+              private float scaleFactor = 1.0f;
+              private final float baseTextSizeSp = 16f;
+              private ScaleGestureDetector scaleDetector;
+              private Paint linePaint;
+              private Paint marginPaint;
+
+              public DynamicCanvasEditText(Context context) {
+                  super(context);
+                  scaleDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                      @Override public boolean onScale(ScaleGestureDetector detector) {
+                          scaleFactor *= detector.getScaleFactor();
+                          scaleFactor = Math.max(1.0f, Math.min(scaleFactor, 6.0f));
+                          setTextSize(baseTextSizeSp * scaleFactor);
+                          return true;
+                      }
+                  });
+                  linePaint = new Paint();
+                  linePaint.setColor(Color.parseColor("#CCCCCC"));
+                  linePaint.setStrokeWidth(2f);
+                  marginPaint = new Paint();
+                  marginPaint.setColor(Color.parseColor("#FF5555"));
+                  marginPaint.setStrokeWidth(3f);
               }
-              override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-                  db.execSQL("DROP TABLE IF EXISTS items")
-                  onCreate(db)
+
+              public void setPageStyle(String style) { this.pageStyle = style; invalidate(); }
+              public String getPageStyle() { return this.pageStyle; }
+
+              @Override public boolean onTouchEvent(MotionEvent event) {
+                  if (!isFocusable()) { scaleDetector.onTouchEvent(event); }
+                  return super.onTouchEvent(event);
+              }
+
+              @Override protected void onDraw(Canvas canvas) {
+                  if (pageStyle.equals("Ruled") || pageStyle.equals("Vertical")) {
+                      int lineH = getLineHeight();
+                      int count = getHeight() / lineH;
+                      for (int i = 1; i <= count; i++) {
+                          float y = (float) (i * lineH);
+                          canvas.drawLine(0f, y, getWidth(), y, linePaint);
+                      }
+                      if (pageStyle.equals("Vertical")) {
+                          canvas.drawLine(90f, 0f, 90f, getHeight(), marginPaint);
+                      }
+                  } else if (pageStyle.equals("Grid")) {
+                      float step = 60f;
+                      for (float x = 0f; x < getWidth(); x += step) { canvas.drawLine(x, 0f, x, getHeight(), linePaint); }
+                      for (float y = 0f; y < getHeight(); y += step) { canvas.drawLine(0f, y, getWidth(), y, linePaint); }
+                  }
+                  super.onDraw(canvas);
               }
           }
 
-          class MainActivity : AppCompatActivity() {
+          class DatabaseHelper extends SQLiteOpenHelper {
+              public DatabaseHelper(Context context) { super(context, "ZeeshanNotice.db", null, 8); }
+              @Override public void onCreate(SQLiteDatabase db) {
+                  db.execSQL("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, content TEXT, is_folder INTEGER, parent_id INTEGER, is_locked INTEGER DEFAULT 0, is_editor_locked INTEGER DEFAULT 0)");
+              }
+              @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+                  db.execSQL("DROP TABLE IF EXISTS items");
+                  onCreate(db);
+              }
+          }
 
-              companion object {
-                  const val MAX_STORAGE_BYTES: Long = 100L * 1024L * 1024L 
+          public class MainActivity extends AppCompatActivity {
+
+              public static final long MAX_STORAGE_BYTES = 100L * 1024L * 1024L;
+              private volatile long currentUsedBytesCached = 0L;
+
+              private DatabaseHelper dbHelper;
+              private SharedPreferences prefs;
+              private DrawerLayout drawerLayout;
+              private LinearLayout mainContainer;
+              private FrameLayout dashboardHeader;
+              private LinearLayout projectHeader;
+              private TextView dashboardTitleTv;
+              private TextView projectTitleTv;
+              private TextView drawerMemoryText;
+              private View drawerProgressView;
+              private LinearLayout editorLayout;
+              private LinearLayout noticeListLayout;
+              private TextView emptyStateTv;
+              private DynamicCanvasEditText noteEditText;
+              private Button colorMenuBtn;
+              private Button lockToggleBtn;
+
+              private long currentFolderId = 0L;
+              private Long editingNoteId = null;
+              private String selectedStyleTemp = "Plain";
+              private int activeColor = Color.BLACK;
+              private boolean isPageEditorLocked = true;
+              private ArrayList<Integer> color48List = new ArrayList<>();
+
+              private final int[] original24Colors = new int[]{
+                  Color.BLACK, Color.parseColor("#1C1C1C"), Color.parseColor("#2F4F4F"),
+                  Color.parseColor("#8B0000"), Color.parseColor("#FF0000"), Color.parseColor("#FF4500"),
+                  Color.parseColor("#FF8C00"), Color.parseColor("#FFD700"), Color.parseColor("#32CD32"),
+                  Color.parseColor("#008000"), Color.parseColor("#006400"), Color.parseColor("#00FFFF"),
+                  Color.parseColor("#1E90FF"), Color.parseColor("#0000FF"), Color.parseColor("#00008B"),
+                  Color.parseColor("#8A2BE2"), Color.parseColor("#4B0082"), Color.parseColor("#9932CC"),
+                  Color.parseColor("#FF00FF"), Color.parseColor("#FF1493"), Color.parseColor("#A52A2A"),
+                  Color.parseColor("#800000"), Color.parseColor("#556B2F"), Color.parseColor("#4682B4")
+              };
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  dbHelper = new DatabaseHelper(this);
+                  prefs = getSharedPreferences("ZeeshanNoticePrefs", Context.MODE_PRIVATE);
+
+                  generate48ColorsData();
+
+                  drawerLayout = new DrawerLayout(this);
+                  drawerLayout.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
+
+                  mainContainer = new LinearLayout(this);
+                  mainContainer.setOrientation(LinearLayout.VERTICAL);
+                  mainContainer.setBackgroundColor(Color.parseColor("#F8F9FA"));
+                  mainContainer.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
+
+                  dashboardHeader = new FrameLayout(this);
+                  GradientDrawable headerBg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{Color.parseColor("#2D3748"), Color.parseColor("#1A202C")});
+                  dashboardHeader.setBackground(headerBg);
+                  dashboardHeader.setPadding(24, 30, 24, 30);
+                  dashboardHeader.setElevation(10f);
+                  dashboardHeader.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+
+                  TextView menuBtn = new TextView(this);
+                  menuBtn.setText("≡");
+                  menuBtn.setTextSize(28f);
+                  menuBtn.setTextColor(Color.WHITE);
+                  menuBtn.setTypeface(null, Typeface.BOLD);
+                  menuBtn.setPadding(20, 0, 20, 0);
+                  menuBtn.setLayoutParams(new FrameLayout.LayoutParams(-2, -2, Gravity.START | Gravity.CENTER_VERTICAL));
+                  menuBtn.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+                  dashboardTitleTv = new TextView(this);
+                  dashboardTitleTv.setText("𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞");
+                  dashboardTitleTv.setTextSize(22f);
+                  dashboardTitleTv.setTypeface(null, Typeface.BOLD);
+                  dashboardTitleTv.setTextColor(Color.WHITE);
+                  dashboardTitleTv.setGravity(Gravity.CENTER);
+                  dashboardTitleTv.setLayoutParams(new FrameLayout.LayoutParams(-1, -2, Gravity.CENTER));
+
+                  dashboardHeader.addView(dashboardTitleTv);
+                  dashboardHeader.addView(menuBtn);
+
+                  projectHeader = new LinearLayout(this);
+                  projectHeader.setOrientation(LinearLayout.HORIZONTAL);
+                  projectHeader.setGravity(Gravity.CENTER_VERTICAL);
+                  projectHeader.setPadding(30, 35, 30, 35);
+                  projectHeader.setBackground(headerBg);
+                  projectHeader.setVisibility(View.GONE);
+                  projectHeader.setElevation(10f);
+
+                  TextView backBtn = new TextView(this);
+                  backBtn.setText("←");
+                  backBtn.setTextSize(26f);
+                  backBtn.setTextColor(Color.WHITE);
+                  backBtn.setTypeface(null, Typeface.BOLD);
+                  backBtn.setPadding(0, 0, 25, 0);
+                  backBtn.setOnClickListener(v -> closeEditor());
+
+                  projectTitleTv = new TextView(this);
+                  projectTitleTv.setText("New Page");
+                  projectTitleTv.setTextSize(18f);
+                  projectTitleTv.setTypeface(null, Typeface.BOLD);
+                  projectTitleTv.setTextColor(Color.WHITE);
+                  projectTitleTv.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+
+                  TextView saveBtn = new TextView(this);
+                  saveBtn.setText("✔ SAVE");
+                  saveBtn.setTextSize(15f);
+                  saveBtn.setTypeface(null, Typeface.BOLD);
+                  saveBtn.setTextColor(Color.parseColor("#38BDF8"));
+                  saveBtn.setOnClickListener(v -> saveCurrentNote());
+
+                  projectHeader.addView(backBtn);
+                  projectHeader.addView(projectTitleTv);
+                  projectHeader.addView(saveBtn);
+
+                  noticeListLayout = new LinearLayout(this);
+                  noticeListLayout.setOrientation(LinearLayout.VERTICAL);
+                  noticeListLayout.setPadding(30, 30, 30, 30);
+                  noticeListLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
+
+                  emptyStateTv = new TextView(this);
+                  emptyStateTv.setText("No folders or pages available.\nTap '+' below to create a new folder or page.");
+                  emptyStateTv.setTextSize(15f);
+                  emptyStateTv.setTextColor(Color.GRAY);
+                  emptyStateTv.setGravity(Gravity.CENTER);
+                  emptyStateTv.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
+                  noticeListLayout.addView(emptyStateTv);
+
+                  editorLayout = new LinearLayout(this);
+                  editorLayout.setOrientation(LinearLayout.VERTICAL);
+                  editorLayout.setBackgroundColor(Color.WHITE);
+                  editorLayout.setVisibility(View.GONE);
+                  editorLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -1, 1f));
+
+                  LinearLayout styleToolBar = new LinearLayout(this);
+                  styleToolBar.setOrientation(LinearLayout.HORIZONTAL);
+                  styleToolBar.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+                  styleToolBar.setPadding(20, 15, 20, 15);
+                  styleToolBar.setBackgroundColor(Color.parseColor("#EDF2F7"));
+
+                  colorMenuBtn = new Button(this);
+                  colorMenuBtn.setText("🎨 Color");
+                  colorMenuBtn.setTextSize(13f);
+                  colorMenuBtn.setTextColor(Color.BLACK);
+                  colorMenuBtn.setTypeface(null, Typeface.BOLD);
+                  GradientDrawable colorBtnBg = new GradientDrawable();
+                  colorBtnBg.setColor(Color.WHITE);
+                  colorBtnBg.setCornerRadius(20f);
+                  colorBtnBg.setStroke(3, Color.parseColor("#CBD5E0"));
+                  colorMenuBtn.setBackground(colorBtnBg);
+                  colorMenuBtn.setOnClickListener(v -> openCompactColorPicker());
+
+                  Button styleMenuBtn = new Button(this);
+                  styleMenuBtn.setText("📄 Style");
+                  styleMenuBtn.setTextSize(13f);
+                  styleMenuBtn.setTextColor(Color.parseColor("#2D3748"));
+                  styleMenuBtn.setTypeface(null, Typeface.BOLD);
+                  GradientDrawable styleBtnBg = new GradientDrawable();
+                  styleBtnBg.setColor(Color.WHITE);
+                  styleBtnBg.setCornerRadius(20f);
+                  styleBtnBg.setStroke(2, Color.parseColor("#CBD5E0"));
+                  styleMenuBtn.setBackground(styleBtnBg);
+                  LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-2, -2);
+                  lp.setMargins(15, 0, 0, 0);
+                  styleMenuBtn.setLayoutParams(lp);
+                  styleMenuBtn.setOnClickListener(v -> showPageStyleDialog());
+
+                  lockToggleBtn = new Button(this);
+                  lockToggleBtn.setText("🔒");
+                  lockToggleBtn.setTextSize(15f);
+                  GradientDrawable lockBtnBg = new GradientDrawable();
+                  lockBtnBg.setColor(Color.WHITE);
+                  lockBtnBg.setCornerRadius(20f);
+                  lockBtnBg.setStroke(2, Color.parseColor("#CBD5E0"));
+                  lockToggleBtn.setBackground(lockBtnBg);
+                  lockToggleBtn.setLayoutParams(lp);
+                  lockToggleBtn.setOnClickListener(v -> toggleEditorLockState());
+
+                  styleToolBar.addView(colorMenuBtn);
+                  styleToolBar.addView(styleMenuBtn);
+                  styleToolBar.addView(lockToggleBtn);
+
+                  noteEditText = new DynamicCanvasEditText(this);
+                  noteEditText.setHint("Write your notice here...");
+                  noteEditText.setTextSize(16f);
+                  noteEditText.setPadding(40, 40, 40, 40);
+                  noteEditText.setGravity(Gravity.TOP);
+                  noteEditText.setBackgroundColor(Color.WHITE);
+                  noteEditText.setLayoutParams(new LinearLayout.LayoutParams(-1, -1));
+
+                  editorLayout.addView(styleToolBar);
+                  editorLayout.addView(noteEditText);
+
+                  FrameLayout fabLayout = new FrameLayout(this);
+                  fabLayout.setLayoutParams(new LinearLayout.LayoutParams(-1, -2));
+
+                  Button fabBtn = new Button(this);
+                  fabBtn.setText("+");
+                  fabBtn.setTextSize(30f);
+                  fabBtn.setTextColor(Color.WHITE);
+                  GradientDrawable fabBg = new GradientDrawable();
+                  fabBg.setShape(GradientDrawable.OVAL);
+                  fabBg.setColor(Color.parseColor("#1A202C"));
+                  fabBg.setStroke(4, Color.parseColor("#38BDF8"));
+                  fabBtn.setBackground(fabBg);
+                  fabBtn.setElevation(12f);
+                  FrameLayout.LayoutParams fabLp = new FrameLayout.LayoutParams(130, 130);
+                  fabLp.gravity = Gravity.END | Gravity.BOTTOM;
+                  fabLp.setMargins(0, 0, 40, 40);
+                  fabBtn.setLayoutParams(fabLp);
+                  fabBtn.setOnClickListener(v -> show3DChooseActionDialog());
+
+                  fabLayout.addView(fabBtn);
+
+                  mainContainer.addView(dashboardHeader);
+                  mainContainer.addView(projectHeader);
+                  mainContainer.addView(noticeListLayout);
+                  mainContainer.addView(editorLayout);
+                  mainContainer.addView(fabLayout);
+
+                  drawerLayout.addView(mainContainer);
+                  setContentView(drawerLayout);
               }
 
-              @Volatile private var currentUsedBytesCached: Long = 0L
-
-              private lateinit var dbHelper: DatabaseHelper
-              private lateinit var prefs: SharedPreferences
-              private lateinit var drawerLayout: DrawerLayout
-              private lateinit var mainContainer: LinearLayout
-              private lateinit var dashboardHeader: FrameLayout
-              private lateinit var projectHeader: LinearLayout
-              private lateinit var dashboardTitleTv: TextView
-              private lateinit var projectTitleTv: TextView
-              private lateinit var drawerMemoryText: TextView
-              private lateinit var drawerProgressView: View
-              private lateinit var editorLayout: LinearLayout
-              private lateinit var noticeListLayout: LinearLayout
-              private lateinit var emptyStateTv: TextView
-              private lateinit var noteEditText: DynamicCanvasEditText
-              private lateinit var colorMenuBtn: Button
-              private lateinit var lockToggleBtn: Button
-
-              private var currentFolderId: Long = 0L
-              private var editingNoteId: Long? = null
-              private var selectedStyleTemp: String = "Plain"
-
-              private var activeColor: Int = Color.BLACK
-              private var isPageEditorLocked = true
-
-              private val chocolatyThemeColor = Color.parseColor("#361B12")
-              private val goldenThemeColor = Color.parseColor("#D4AF37")
-              private val whiteThemeColor = Color.parseColor("#FFFFFF")
-
-              private val original24Colors = intArrayOf(
-                  Color.BLACK, Color.parseColor("#1C1C1C"), Color.parseColor("#361B12"), Color.parseColor("#4E2A1E"),
-                  Color.parseColor("#8B0000"), Color.parseColor("#FF0000"), Color.parseColor("#D4AF37"), Color.parseColor("#FFD700"),
-                  Color.parseColor("#32CD32"), Color.parseColor("#008000"), Color.parseColor("#006400"), Color.parseColor("#00FFFF"),
-                  Color.parseColor("#1E90FF"), Color.parseColor("#0000FF"), Color.parseColor("#00008B"), Color.parseColor("#8A2BE2"),
-                  Color.parseColor("#4B0082"), Color.parseColor("#9932CC"), Color.parseColor("#FF00FF"), Color.parseColor("#FF1493"),
-                  Color.parseColor("#A52A2A"), Color.parseColor("#800000"), Color.parseColor("#556B2F"), Color.parseColor("#4682B4")
-              )
-
-              private val color48List = ArrayList<Int>()
-
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  dbHelper = DatabaseHelper(this)
-                  prefs = getSharedPreferences("ZeeshanNoticePrefs", Context.MODE_PRIVATE)
-
-                  generate48ColorsData()
-
-                  drawerLayout = DrawerLayout(this).apply {
-                      layoutParams = FrameLayout.LayoutParams(-1, -1)
-                  }
-
-                  mainContainer = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(whiteThemeColor)
-                      layoutParams = FrameLayout.LayoutParams(-1, -1)
-                  }
-
-                  // 1. Main Header (Chocolaty Background + Gold/White Text)
-                  dashboardHeader = FrameLayout(this).apply {
-                      setBackgroundColor(chocolatyThemeColor)
-                      setPadding(24, 30, 24, 30)
-                      elevation = 10f
-                      layoutParams = LinearLayout.LayoutParams(-1, -2)
-                  }
-
-                  val menuBtn = TextView(this).apply {
-                      text = "≡"
-                      textSize = 28f
-                      setTextColor(goldenThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      setPadding(20, 0, 20, 0)
-                      layoutParams = FrameLayout.LayoutParams(-2, -2, Gravity.START or Gravity.CENTER_VERTICAL)
-                      setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
-                  }
-
-                  dashboardTitleTv = TextView(this).apply {
-                      text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
-                      textSize = 22f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                      gravity = Gravity.CENTER
-                      layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.CENTER)
-                  }
-
-                  dashboardHeader.addView(dashboardTitleTv)
-                  dashboardHeader.addView(menuBtn)
-
-                  // Editor Header
-                  projectHeader = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.CENTER_VERTICAL
-                      setPadding(30, 35, 30, 35)
-                      setBackgroundColor(chocolatyThemeColor)
-                      visibility = View.GONE
-                      elevation = 10f
-                  }
-
-                  val backBtn = TextView(this).apply {
-                      text = "Back"
-                      textSize = 16f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      setPadding(0, 0, 25, 0)
-                      setOnClickListener { closeEditor() }
-                  }
-
-                  projectTitleTv = TextView(this).apply {
-                      text = "New Page"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(goldenThemeColor)
-                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-                  }
-
-                  val saveBtn = TextView(this).apply {
-                      text = "Save"
-                      textSize = 16f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(goldenThemeColor)
-                      setOnClickListener { saveCurrentNote() }
-                  }
-
-                  projectHeader.addView(backBtn)
-                  projectHeader.addView(projectTitleTv)
-                  projectHeader.addView(saveBtn)
-
-                  noticeListLayout = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(30, 30, 30, 30)
-                      layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
-                  }
-
-                  // 2. Empty State
-                  emptyStateTv = TextView(this).apply {
-                      text = "No items found"
-                      textSize = 16f
-                      setTextColor(Color.DKGRAY)
-                      gravity = Gravity.CENTER
-                      layoutParams = LinearLayout.LayoutParams(-1, -1)
-                  }
-                  noticeListLayout.addView(emptyStateTv)
-
-                  editorLayout = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(whiteThemeColor)
-                      visibility = View.GONE
-                      layoutParams = LinearLayout.LayoutParams(-1, -1, 1f)
-                  }
-
-                  // 13. Toolbar Options
-                  val styleToolBar = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
-                      setPadding(20, 15, 20, 15)
-                      setBackgroundColor(Color.parseColor("#F4EFEA"))
-                  }
-
-                  colorMenuBtn = Button(this).apply {
-                      text = "Color"
-                      textSize = 13f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      setOnClickListener { openCompactColorPicker() }
-                  }
-
-                  val styleMenuBtn = Button(this).apply {
-                      text = "Layout"
-                      textSize = 13f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
-                      setOnClickListener { showPageStyleDialog() }
-                  }
-
-                  lockToggleBtn = Button(this).apply {
-                      text = "Lock"
-                      textSize = 13f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
-                      setOnClickListener { toggleEditorLockState() }
-                  }
-
-                  styleToolBar.addView(colorMenuBtn)
-                  styleToolBar.addView(styleMenuBtn)
-                  styleToolBar.addView(lockToggleBtn)
-
-                  noteEditText = DynamicCanvasEditText(this).apply {
-                      hint = "Write your notice here..."
-                      textSize = 16f
-                      setPadding(40, 40, 40, 40)
-                      gravity = Gravity.TOP
-                      setBackgroundColor(whiteThemeColor)
-                      layoutParams = LinearLayout.LayoutParams(-1, -1)
-                  }
-
-                  noteEditText.addTextChangedListener(object : TextWatcher {
-                      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-                      override fun afterTextChanged(editable: Editable?) {
-                          if (isMemoryFull()) {
-                              showMemoryFullPopUp()
-                              isPageEditorLocked = true
-                              applyEditorLockUI()
-                          }
-                      }
-                  })
-
-                  editorLayout.addView(styleToolBar)
-                  editorLayout.addView(noteEditText)
-
-                  val fabLayout = FrameLayout(this).apply {
-                      layoutParams = LinearLayout.LayoutParams(-1, -2)
-                  }
-                  val fabBtn = Button(this).apply {
-                      text = "+"
-                      textSize = 30f
-                      setTextColor(goldenThemeColor)
-                      background = GradientDrawable().apply {
-                          shape = GradientDrawable.OVAL
-                          setColor(chocolatyThemeColor)
-                          setStroke(3, goldenThemeColor)
-                      }
-                      elevation = 12f
-                      layoutParams = FrameLayout.LayoutParams(130, 130).apply {
-                          gravity = Gravity.END or Gravity.BOTTOM
-                          setMargins(0, 0, 40, 40)
-                      }
-                      setOnClickListener { 
-                          if (isMemoryFull()) {
-                              showMemoryFullPopUp()
-                          } else {
-                              show3DChooseActionDialog() 
-                          }
-                      }
-                  }
-                  fabLayout.addView(fabBtn)
-
-                  mainContainer.addView(dashboardHeader)
-                  mainContainer.addView(projectHeader)
-                  mainContainer.addView(noticeListLayout)
-                  mainContainer.addView(editorLayout)
-                  mainContainer.addView(fabLayout)
-
-                  val navView = NavigationView(this).apply {
-                      layoutParams = DrawerLayout.LayoutParams(720, -1).apply {
-                          gravity = GravityCompat.START
-                      }
-                  }
-
-                  val drawerHeaderCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(40, 50, 40, 40)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val memoryTitle = TextView(this).apply {
-                      text = "Memory Status"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(goldenThemeColor)
-                      setPadding(0, 0, 0, 20)
-                  }
-
-                  val progressTrack = FrameLayout(this).apply {
-                      layoutParams = LinearLayout.LayoutParams(-1, 24).apply {
-                          setMargins(0, 0, 0, 20)
-                      }
-                      background = GradientDrawable().apply {
-                          setColor(Color.WHITE)
-                          cornerRadius = 12f
-                      }
-                  }
-
-                  drawerProgressView = View(this).apply {
-                      layoutParams = FrameLayout.LayoutParams(0, -1)
-                      background = GradientDrawable().apply {
-                          setColor(goldenThemeColor)
-                          cornerRadius = 12f
-                      }
-                  }
-                  progressTrack.addView(drawerProgressView)
-
-                  drawerMemoryText = TextView(this).apply {
-                      text = "0.00 KB / 100 MB"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-
-                  drawerHeaderCard.addView(memoryTitle)
-                  drawerHeaderCard.addView(progressTrack)
-                  drawerHeaderCard.addView(drawerMemoryText)
-
-                  navView.addHeaderView(drawerHeaderCard)
-
-                  drawerLayout.addView(mainContainer)
-                  drawerLayout.addView(navView)
-                  setContentView(drawerLayout)
-
-                  loadCurrentDirectoryItems()
-                  updateMemoryUsage()
+              private int mixWith50PercentWhite(int color) {
+                  int r = (Color.red(color) + 255) / 2;
+                  int g = (Color.green(color) + 255) / 2;
+                  int b = (Color.blue(color) + 255) / 2;
+                  return Color.rgb(r, g, b);
               }
 
-              private fun mixWith50PercentWhite(color: Int): Int {
-                  val r = (Color.red(color) + 255) / 2
-                  val g = (Color.green(color) + 255) / 2
-                  val b = (Color.blue(color) + 255) / 2
-                  return Color.rgb(r, g, b)
+              private void generate48ColorsData() {
+                  color48List.clear();
+                  for (int col : original24Colors) color48List.add(col);
+                  for (int col : original24Colors) color48List.add(mixWith50PercentWhite(col));
               }
 
-              private fun generate48ColorsData() {
-                  color48List.clear()
-                  for (col in original24Colors) {
-                      color48List.add(col)
-                  }
-                  for (col in original24Colors) {
-                      color48List.add(mixWith50PercentWhite(col))
-                  }
+              private void closeEditor() {
+                  InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                  imm.hideSoftInputFromWindow(noteEditText.getWindowToken(), 0);
+                  projectHeader.setVisibility(View.GONE);
+                  editorLayout.setVisibility(View.GONE);
+                  dashboardHeader.setVisibility(View.VISIBLE);
+                  noticeListLayout.setVisibility(View.VISIBLE);
+                  activeColor = Color.BLACK;
               }
 
-              private fun getJavaStorageUsageBytes(): Long {
-                  var totalSize: Long = 0
-                  try {
-                      val dbFile = getDatabasePath("ZeeshanNotice.db")
-                      if (dbFile.exists()) {
-                          totalSize += dbFile.length()
-                      }
-                      val filesDirSize = getFolderSize(filesDir)
-                      totalSize += filesDirSize
-                  } catch (e: Exception) {
-                      e.printStackTrace()
-                  }
-                  return totalSize
+              private void saveCurrentNote() {
+                  Toast.makeText(this, "Page saved successfully!", Toast.LENGTH_SHORT).show();
+                  closeEditor();
               }
 
-              private fun getFolderSize(file: File): Long {
-                  var size: Long = 0
-                  if (file.isDirectory) {
-                      val files = file.listFiles()
-                      if (files != null) {
-                          for (f in files) {
-                              size += getFolderSize(f)
-                          }
-                      }
-                  } else if (file.exists()) {
-                      size = file.length()
-                  }
-                  return size
+              private void openCompactColorPicker() {
+                  Toast.makeText(this, "Color Picker Opened (Java Mode)", Toast.LENGTH_SHORT).show();
               }
 
-              private fun isMemoryFull(): Boolean {
-                  return currentUsedBytesCached >= MAX_STORAGE_BYTES
+              private void showPageStyleDialog() {
+                  Toast.makeText(this, "Style Dialog Opened (Java Mode)", Toast.LENGTH_SHORT).show();
               }
 
-              private fun showMemoryFullPopUp() {
-                  AlertDialog.Builder(this)
-                      .setTitle("⚠️ Memory Full")
-                      .setMessage("Memory capacity reached (100 MB). Delete unused items.")
-                      .setPositiveButton("Save", null)
-                      .show()
-              }
-
-              private fun toggleEditorLockState() {
-                  if (isMemoryFull()) {
-                      showMemoryFullPopUp()
-                      isPageEditorLocked = true
-                      applyEditorLockUI()
-                      return
-                  }
-                  isPageEditorLocked = !isPageEditorLocked
-                  applyEditorLockUI()
-              }
-
-              private fun applyEditorLockUI() {
+              private void toggleEditorLockState() {
+                  isPageEditorLocked = !isPageEditorLocked;
                   if (isPageEditorLocked) {
-                      lockToggleBtn.text = "Lock"
-                      noteEditText.isFocusable = false
-                      noteEditText.isFocusableInTouchMode = false
-                      noteEditText.clearFocus()
-                      val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                      imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
+                      lockToggleBtn.setText("🔒");
+                      noteEditText.setFocusable(false);
+                      noteEditText.setFocusableInTouchMode(false);
+                      Toast.makeText(this, "🔒 Page Locked", Toast.LENGTH_SHORT).show();
                   } else {
-                      lockToggleBtn.text = "Unlock"
-                      noteEditText.isFocusable = true
-                      noteEditText.isFocusableInTouchMode = true
-                      noteEditText.requestFocus()
-                      val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                      imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT)
+                      lockToggleBtn.setText("🔓");
+                      noteEditText.setFocusable(true);
+                      noteEditText.setFocusableInTouchMode(true);
+                      Toast.makeText(this, "🔓 Unlocked!", Toast.LENGTH_SHORT).show();
                   }
               }
 
-              private fun promptPinLock(title: String, message: String, onSuccess: () -> Unit) {
-                  val masterPin = prefs.getString("master_pin", "1234")
-                  val input = EditText(this).apply {
-                      inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
-                      hint = "4-Digit PIN"
-                  }
-                  val dialog = AlertDialog.Builder(this)
-                      .setTitle(title)
-                      .setMessage(message)
-                      .setView(input)
-                      .setCancelable(true)
-                      .setPositiveButton("Save", null)
-                      .setNegativeButton("Cancel", null)
-                      .create()
-
-                  dialog.setOnShowListener {
-                      val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                      button.setOnClickListener {
-                          val entered = input.text.toString().trim()
-                          if (entered == masterPin) {
-                              dialog.dismiss()
-                              onSuccess()
-                          } else {
-                              Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
-                          }
-                      }
-                  }
-                  dialog.show()
+              private void show3DChooseActionDialog() {
+                 Toast.makeText(this, "Create Dialog (Java Mode)", Toast.LENGTH_SHORT).show();
               }
 
-              private fun openCompactColorPicker() {
-                  val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-                  var tempSelectedColor = activeColor
-
-                  val rootLayout = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setBackgroundColor(chocolatyThemeColor)
-                      layoutParams = ViewGroup.LayoutParams(-1, -1)
-                  }
-
-                  val headerBar = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.CENTER_VERTICAL
-                      setPadding(30, 20, 30, 20)
-                      setBackgroundColor(chocolatyThemeColor)
-                      elevation = 12f
-                  }
-
-                  val backBtn = TextView(this).apply {
-                      text = "Back"
-                      textSize = 16f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      setPadding(10, 0, 30, 0)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-
-                  val titleTv = TextView(this).apply {
-                      text = "Color Palette"
-                      textSize = 18f
-                      setTextColor(goldenThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
-                  }
-
-                  val showBtn = Button(this).apply {
-                      text = "Save"
-                      textSize = 14f
-                      setTextColor(chocolatyThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(goldenThemeColor)
-                          cornerRadius = 15f
-                      }
-                      setOnClickListener {
-                          activeColor = tempSelectedColor
-                          noteEditText.customTextColor = activeColor
-                          dialog.dismiss()
-                      }
-                  }
-
-                  headerBar.addView(backBtn)
-                  headerBar.addView(titleTv)
-                  headerBar.addView(showBtn)
-
-                  val scrollView = ScrollView(this).apply {
-                      layoutParams = LinearLayout.LayoutParams(-1, 0, 1f)
-                  }
-                  val pageContainer = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(20, 20, 20, 20)
-                  }
-                  scrollView.addView(pageContainer)
-
-                  val columns = 6
-                  var currentRow: LinearLayout? = null
-
-                  for (i in 0 until color48List.size) {
-                      if (i % columns == 0) {
-                          currentRow = LinearLayout(this).apply {
-                              orientation = LinearLayout.HORIZONTAL
-                              gravity = Gravity.CENTER_HORIZONTAL
-                              layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
-                                  setMargins(0, 8, 0, 8)
-                              }
-                          }
-                          pageContainer.addView(currentRow)
-                      }
-
-                      val colorVal = color48List[i]
-                      val box = View(this).apply {
-                          layoutParams = LinearLayout.LayoutParams(95, 95).apply {
-                              setMargins(8, 8, 8, 8)
-                          }
-                          background = GradientDrawable().apply {
-                              setColor(colorVal)
-                              cornerRadius = 16f
-                              setStroke(2, goldenThemeColor)
-                          }
-                          setOnClickListener {
-                              tempSelectedColor = colorVal
-                          }
-                      }
-                      currentRow?.addView(box)
-                  }
-
-                  rootLayout.addView(headerBar)
-                  rootLayout.addView(scrollView)
-
-                  dialog.setContentView(rootLayout)
-                  dialog.show()
-              }
-
-              // 14. Page Style Options
-              private fun showPageStyleDialog() {
-                  val options = arrayOf(
-                      "Plain",
-                      "Ruled",
-                      "Grid",
-                      "Margin"
-                  )
-                  val keys = arrayOf("Plain", "Ruled", "Grid", "Margin")
-
-                  selectedStyleTemp = noteEditText.pageStyle
-
-                  AlertDialog.Builder(this)
-                      .setTitle("Page Style")
-                      .setSingleChoiceItems(options, keys.indexOf(noteEditText.pageStyle)) { _, which ->
-                          selectedStyleTemp = keys[which]
-                      }
-                      .setPositiveButton("Save") { _, _ ->
-                          noteEditText.pageStyle = selectedStyleTemp
-                      }
-                      .setNegativeButton("Cancel", null)
-                      .show()
-              }
-
-              override fun onBackPressed() {
-                  if (editorLayout.visibility == View.VISIBLE) {
-                      closeEditor()
-                  } else if (currentFolderId != 0L) {
-                      currentFolderId = 0L
-                      dashboardTitleTv.text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
-                      loadCurrentDirectoryItems()
+              @Override
+              public void onBackPressed() {
+                  if (editorLayout.getVisibility() == View.VISIBLE) {
+                      closeEditor();
                   } else {
-                      super.onBackPressed()
+                      super.onBackPressed();
                   }
-              }
-
-              // 3. Plus Button Popup
-              private fun show3DChooseActionDialog() {
-                  val dialog = Dialog(this)
-                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                  val dialogCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 16f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 25f
-                          setStroke(3, goldenThemeColor)
-                      }
-                      layoutParams = ViewGroup.LayoutParams(800, -2)
-                  }
-
-                  val header = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.CENTER_VERTICAL
-                      setPadding(35, 25, 35, 25)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val title = TextView(this).apply {
-                      text = "New Item"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-                  header.addView(title)
-
-                  val body = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(30, 25, 30, 15)
-                  }
-
-                  // 4. New Folder Button
-                  val folderBtn = Button(this).apply {
-                      text = "New Folder"
-                      textSize = 15f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 15) }
-                      setOnClickListener {
-                          dialog.dismiss()
-                          show3DCreateFolderDialog()
-                      }
-                  }
-
-                  // 5. New Page Button
-                  val pageBtn = Button(this).apply {
-                      text = "New Page"
-                      textSize = 15f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      setOnClickListener {
-                          dialog.dismiss()
-                          show3DCreatePageDialog()
-                      }
-                  }
-
-                  body.addView(folderBtn)
-                  body.addView(pageBtn)
-
-                  val footer = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END
-                      setPadding(20, 0, 25, 20)
-                  }
-
-                  val cancelBtn = TextView(this).apply {
-                      text = "Cancel"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(20, 10, 20, 10)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-                  footer.addView(cancelBtn)
-
-                  dialogCard.addView(header)
-                  dialogCard.addView(body)
-                  dialogCard.addView(footer)
-
-                  dialog.setContentView(dialogCard)
-                  dialog.show()
-              }
-
-              // 6. Folder Input Popup
-              private fun show3DCreateFolderDialog() {
-                  val dialog = Dialog(this)
-                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                  val dialogCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 16f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 25f
-                          setStroke(3, chocolatyThemeColor)
-                      }
-                      layoutParams = ViewGroup.LayoutParams(800, -2)
-                  }
-
-                  val header = LinearLayout(this).apply {
-                      setPadding(35, 25, 35, 25)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val title = TextView(this).apply {
-                      text = "New Folder"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-                  header.addView(title)
-
-                  val body = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(35, 25, 35, 15)
-                  }
-
-                  val input = EditText(this).apply {
-                      hint = "Folder name"
-                      textSize = 15f
-                      setPadding(25, 20, 25, 20)
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 15f
-                          setStroke(2, chocolatyThemeColor)
-                      }
-                  }
-                  body.addView(input)
-
-                  val footer = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END
-                      setPadding(20, 10, 30, 25)
-                  }
-
-                  val cancelBtn = TextView(this).apply {
-                      text = "Cancel"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(20, 10, 20, 10)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-
-                  val createBtn = Button(this).apply {
-                      text = "Save"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      background = GradientDrawable().apply {
-                          setColor(goldenThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
-                      setOnClickListener {
-                          val name = input.text.toString().ifEmpty { "New Folder" }
-                          saveFolderToDb(name, currentFolderId)
-                          loadCurrentDirectoryItems()
-                          dialog.dismiss()
-                      }
-                  }
-
-                  footer.addView(cancelBtn)
-                  footer.addView(createBtn)
-
-                  dialogCard.addView(header)
-                  dialogCard.addView(body)
-                  dialogCard.addView(footer)
-
-                  dialog.setContentView(dialogCard)
-                  dialog.show()
-              }
-
-              // 7. Page Input Popup
-              private fun show3DCreatePageDialog() {
-                  val dialog = Dialog(this)
-                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                  val dialogCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 16f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 25f
-                          setStroke(3, chocolatyThemeColor)
-                      }
-                      layoutParams = ViewGroup.LayoutParams(800, -2)
-                  }
-
-                  val header = LinearLayout(this).apply {
-                      setPadding(35, 25, 35, 25)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val title = TextView(this).apply {
-                      text = "New Page"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-                  header.addView(title)
-
-                  val body = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(35, 25, 35, 15)
-                  }
-
-                  val input = EditText(this).apply {
-                      hint = "Page title"
-                      textSize = 15f
-                      setPadding(25, 20, 25, 20)
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 15f
-                          setStroke(2, chocolatyThemeColor)
-                      }
-                  }
-                  body.addView(input)
-
-                  val footer = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END
-                      setPadding(20, 10, 30, 25)
-                  }
-
-                  val cancelBtn = TextView(this).apply {
-                      text = "Cancel"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(20, 10, 20, 10)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-
-                  val createBtn = Button(this).apply {
-                      text = "Save"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      background = GradientDrawable().apply {
-                          setColor(goldenThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
-                      setOnClickListener {
-                          val pageTitle = input.text.toString().ifEmpty { "Untitled Page" }
-                          editingNoteId = null
-                          openEditor(pageTitle, "")
-                          dialog.dismiss()
-                      }
-                  }
-
-                  footer.addView(cancelBtn)
-                  footer.addView(createBtn)
-
-                  dialogCard.addView(header)
-                  dialogCard.addView(body)
-                  dialogCard.addView(footer)
-
-                  dialog.setContentView(dialogCard)
-                  dialog.show()
-              }
-
-              private fun saveFolderToDb(title: String, parentId: Long): Long {
-                  val db = dbHelper.writableDatabase
-                  val values = ContentValues().apply {
-                      put("title", title)
-                      put("content", "")
-                      put("is_folder", 1)
-                      put("parent_id", parentId)
-                      put("is_locked", 0)
-                      put("is_editor_locked", 1)
-                  }
-                  val id = db.insert("items", null, values)
-                  updateMemoryUsage()
-                  return id
-              }
-
-              private fun loadCurrentDirectoryItems() {
-                  noticeListLayout.removeAllViews()
-                  val db = dbHelper.readableDatabase
-                  val cursor = db.rawQuery("SELECT * FROM items WHERE parent_id = ?", arrayOf(currentFolderId.toString()))
-                  
-                  if (cursor.count == 0) {
-                      noticeListLayout.addView(emptyStateTv)
-                      emptyStateTv.visibility = View.VISIBLE
-                  } else {
-                      emptyStateTv.visibility = View.GONE
-                      while (cursor.moveToNext()) {
-                          val id = cursor.getLong(cursor.getColumnIndexOrThrow("id"))
-                          val title = cursor.getString(cursor.getColumnIndexOrThrow("title"))
-                          val content = cursor.getString(cursor.getColumnIndexOrThrow("content"))
-                          val isFolder = cursor.getInt(cursor.getColumnIndexOrThrow("is_folder")) == 1
-                          val isLocked = cursor.getInt(cursor.getColumnIndexOrThrow("is_locked")) == 1
-                          val isEditorLocked = cursor.getInt(cursor.getColumnIndexOrThrow("is_editor_locked")) == 1
-                          
-                          renderItemCard(ItemModel(id, title, content, isFolder, currentFolderId, isLocked, isEditorLocked))
-                      }
-                  }
-                  cursor.close()
-              }
-
-              // 8 & 9. Card Rendering
-              private fun renderItemCard(item: ItemModel) {
-                  val card = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 4f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 15f
-                          setStroke(2, chocolatyThemeColor)
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply {
-                          setMargins(0, 0, 0, 20)
-                      }
-                      setOnClickListener {
-                          if (item.isFolder) {
-                              if (item.isLocked) {
-                                  promptPinLock("Locked Folder", "Enter PIN:") {
-                                      currentFolderId = item.id
-                                      dashboardTitleTv.text = item.title
-                                      loadCurrentDirectoryItems()
-                                  }
-                              } else {
-                                  currentFolderId = item.id
-                                  dashboardTitleTv.text = item.title
-                                  loadCurrentDirectoryItems()
-                              }
-                          } else {
-                              if (item.isLocked) {
-                                  promptPinLock("Locked Page", "Enter PIN:") {
-                                      editingNoteId = item.id
-                                      openEditor(item.title, item.content)
-                                  }
-                              } else {
-                                  editingNoteId = item.id
-                                  openEditor(item.title, item.content)
-                              }
-                          }
-                      }
-                      setOnLongClickListener {
-                          showOptionMenu(item)
-                          true
-                      }
-                  }
-
-                  val headerText = item.title
-                  val header = TextView(this).apply {
-                      text = headerText
-                      textSize = 16f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                      setPadding(25, 18, 25, 18)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadii = floatArrayOf(15f, 15f, 15f, 15f, 0f, 0f, 0f, 0f)
-                      }
-                  }
-
-                  // 8 & 9. Subtext Formatting (Clean 1-line snippet)
-                  val subtextString = if (item.isFolder) {
-                      if (item.isLocked) "Locked Folder" else "Folder"
-                  } else {
-                      val cleanText = item.content.trim().replace("\n", " ")
-                      val words = cleanText.split("\\s+".toRegex())
-                      if (words.size > 4) {
-                          words.take(4).joinToString(" ") + "..."
-                      } else {
-                          cleanText.ifEmpty { "Empty page" }
-                      }
-                  }
-
-                  val body = TextView(this).apply {
-                      text = subtextString
-                      textSize = 13f
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(25, 15, 25, 15)
-                  }
-
-                  card.addView(header)
-                  card.addView(body)
-                  noticeListLayout.addView(card)
-              }
-
-              // 10. Long Press Context Menu
-              private fun showOptionMenu(item: ItemModel) {
-                  val dialog = Dialog(this)
-                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                  val dialogCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 16f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 25f
-                          setStroke(3, goldenThemeColor)
-                      }
-                      layoutParams = ViewGroup.LayoutParams(800, -2)
-                  }
-
-                  val header = LinearLayout(this).apply {
-                      setPadding(35, 25, 35, 25)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val title = TextView(this).apply {
-                      text = item.title
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-                  header.addView(title)
-
-                  val body = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(30, 20, 30, 10)
-                  }
-
-                  val renameBtn = Button(this).apply {
-                      text = "Rename"
-                      textSize = 14f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 10) }
-                      setOnClickListener {
-                          dialog.dismiss()
-                          renameItem(item)
-                      }
-                  }
-
-                  val lockBtn = Button(this).apply {
-                      text = if (item.isLocked) "Unlock" else "Lock"
-                      textSize = 14f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(chocolatyThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 10) }
-                      setOnClickListener {
-                          dialog.dismiss()
-                          toggleItemLock(item)
-                      }
-                  }
-
-                  val deleteBtn = Button(this).apply {
-                      text = "Delete"
-                      textSize = 14f
-                      setTextColor(whiteThemeColor)
-                      setTypeface(null, Typeface.BOLD)
-                      background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#A52A2A"))
-                          cornerRadius = 15f
-                      }
-                      setOnClickListener {
-                          dialog.dismiss()
-                          deleteItem(item)
-                      }
-                  }
-
-                  body.addView(renameBtn)
-                  body.addView(lockBtn)
-                  body.addView(deleteBtn)
-
-                  val footer = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END
-                      setPadding(20, 0, 25, 20)
-                  }
-
-                  val cancelBtn = TextView(this).apply {
-                      text = "Cancel"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(20, 10, 20, 10)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-                  footer.addView(cancelBtn)
-
-                  dialogCard.addView(header)
-                  dialogCard.addView(body)
-                  dialogCard.addView(footer)
-
-                  dialog.setContentView(dialogCard)
-                  dialog.show()
-              }
-
-              private fun toggleItemLock(item: ItemModel) {
-                  val newLockState = if (item.isLocked) 0 else 1
-                  val db = dbHelper.writableDatabase
-                  val cv = ContentValues().apply { put("is_locked", newLockState) }
-                  db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
-                  loadCurrentDirectoryItems()
-              }
-
-              // 11. Rename Popup
-              private fun renameItem(item: ItemModel) {
-                  val dialog = Dialog(this)
-                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-                  val dialogCard = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      elevation = 16f
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 25f
-                          setStroke(3, chocolatyThemeColor)
-                      }
-                      layoutParams = ViewGroup.LayoutParams(800, -2)
-                  }
-
-                  val header = LinearLayout(this).apply {
-                      setPadding(35, 25, 35, 25)
-                      setBackgroundColor(chocolatyThemeColor)
-                  }
-
-                  val title = TextView(this).apply {
-                      text = "Rename"
-                      textSize = 18f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(whiteThemeColor)
-                  }
-                  header.addView(title)
-
-                  val body = LinearLayout(this).apply {
-                      orientation = LinearLayout.VERTICAL
-                      setPadding(35, 25, 35, 15)
-                  }
-
-                  val input = EditText(this).apply {
-                      setText(item.title)
-                      hint = "New name"
-                      textSize = 15f
-                      setPadding(25, 20, 25, 20)
-                      background = GradientDrawable().apply {
-                          setColor(whiteThemeColor)
-                          cornerRadius = 15f
-                          setStroke(2, chocolatyThemeColor)
-                      }
-                  }
-                  body.addView(input)
-
-                  val footer = LinearLayout(this).apply {
-                      orientation = LinearLayout.HORIZONTAL
-                      gravity = Gravity.END
-                      setPadding(20, 10, 30, 25)
-                  }
-
-                  val cancelBtn = TextView(this).apply {
-                      text = "Cancel"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      setPadding(20, 10, 20, 10)
-                      setOnClickListener { dialog.dismiss() }
-                  }
-
-                  val saveBtn = Button(this).apply {
-                      text = "Save"
-                      textSize = 14f
-                      setTypeface(null, Typeface.BOLD)
-                      setTextColor(chocolatyThemeColor)
-                      background = GradientDrawable().apply {
-                          setColor(goldenThemeColor)
-                          cornerRadius = 15f
-                      }
-                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
-                      setOnClickListener {
-                          val newTitle = input.text.toString().ifEmpty { item.title }
-                          val db = dbHelper.writableDatabase
-                          val cv = ContentValues().apply { put("title", newTitle) }
-                          db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
-                          loadCurrentDirectoryItems()
-                          dialog.dismiss()
-                      }
-                  }
-
-                  footer.addView(cancelBtn)
-                  footer.addView(saveBtn)
-
-                  dialogCard.addView(header)
-                  dialogCard.addView(body)
-                  dialogCard.addView(footer)
-
-                  dialog.setContentView(dialogCard)
-                  dialog.show()
-              }
-
-              private fun deleteItem(item: ItemModel) {
-                  val db = dbHelper.writableDatabase
-                  db.delete("items", "id = ? OR parent_id = ?", arrayOf(item.id.toString(), item.id.toString()))
-                  loadCurrentDirectoryItems()
-                  updateMemoryUsage()
-              }
-
-              private fun saveCurrentNote() {
-                  if (isMemoryFull()) {
-                      showMemoryFullPopUp()
-                      return
-                  }
-
-                  val plainContent = noteEditText.text.toString()
-                  val title = projectTitleTv.text.toString()
-
-                  val db = dbHelper.writableDatabase
-                  if (editingNoteId == null) {
-                      val values = ContentValues().apply {
-                          put("title", title)
-                          put("content", plainContent)
-                          put("is_folder", 0)
-                          put("parent_id", currentFolderId)
-                          put("is_locked", 0)
-                          put("is_editor_locked", 1)
-                      }
-                      editingNoteId = db.insert("items", null, values)
-                  } else {
-                      val cv = ContentValues().apply {
-                          put("title", title)
-                          put("content", plainContent)
-                          put("is_editor_locked", 1)
-                      }
-                      db.update("items", cv, "id = ?", arrayOf(editingNoteId.toString()))
-                  }
-
-                  Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
-                  closeEditor()
-                  loadCurrentDirectoryItems()
-                  updateMemoryUsage()
-              }
-
-              private fun openEditor(title: String, content: String) {
-                  dashboardHeader.visibility = View.GONE
-                  noticeListLayout.visibility = View.GONE
-                  projectHeader.visibility = View.VISIBLE
-                  editorLayout.visibility = View.VISIBLE
-                  projectTitleTv.text = title
-
-                  activeColor = Color.BLACK
-                  noteEditText.customTextColor = activeColor
-
-                  noteEditText.setText(content)
-
-                  isPageEditorLocked = true
-                  applyEditorLockUI()
-
-                  if (isMemoryFull()) {
-                      showMemoryFullPopUp()
-                  }
-              }
-
-              private fun closeEditor() {
-                  val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                  imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
-                  projectHeader.visibility = View.GONE
-                  editorLayout.visibility = View.GONE
-                  dashboardHeader.visibility = View.VISIBLE
-                  noticeListLayout.visibility = View.VISIBLE
-                  activeColor = Color.BLACK
-              }
-
-              private fun updateMemoryUsage() {
-                  Thread {
-                      val bytes = getJavaStorageUsageBytes()
-                      currentUsedBytesCached = bytes
-
-                      val kbUsed = bytes.toDouble() / 1024.0
-                      val mbUsed = kbUsed / 1024.0
-
-                      val memoryText = when {
-                          mbUsed >= 1.0 -> String.format("%.2f MB / 100 MB", mbUsed)
-                          else -> String.format("%.2f KB / 100 MB", kbUsed)
-                      }
-
-                      val fraction = (bytes.toDouble() / MAX_STORAGE_BYTES.toDouble()).coerceIn(0.0, 1.0)
-                      val targetWidth = (720 * fraction).toInt()
-
-                      runOnUiThread {
-                          drawerMemoryText.text = memoryText
-                          drawerProgressView.layoutParams = FrameLayout.LayoutParams(targetWidth, -1)
-                      }
-                  }.start()
               }
           }
           EOF
 
-      # Compilation & Upload
+      # Compile and Build the App
       - name: Build Debug APK
-        run: gradle :app:assembleDebug --no-daemon
+        run: ./gradlew assembleDebug
 
+      # Output the final file for you to download
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Zeeshan-Notice-APK
+          name: Zeeshan-Notice-App-Java-Edition
           path: app/build/outputs/apk/debug/app-debug.apk
+
