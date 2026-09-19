@@ -123,7 +123,7 @@ jobs:
 
               <!-- Deep 3D Shadow -->
               <path
-                  android:pathData="M 65,85 A 35,35 0 0,1 100,50 L 412,50 A 35,35 0 0,1 447,85 L 447,427 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 65,427 Z">
+                  android:pathData="M 65,85 A 35,35 0 0,1 100,50 L 412,50 A 35,35 0 0,1 447,85 L 447,427 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 65,427 Z">
                   <aapt:attr name="android:fillColor">
                       <gradient
                           android:type="radial"
@@ -153,7 +153,7 @@ jobs:
                   </aapt:attr>
               </path>
 
-              <!-- Leather Stitches (Fixed stroke) -->
+              <!-- Leather Stitches -->
               <path
                   android:pathData="M 75,55 L 425,55 M 425,55 L 425,445 M 425,445 L 75,445 M 75,445 L 75,55"
                   android:strokeColor="#C89662"
@@ -405,7 +405,7 @@ jobs:
               private var selectedStyleTemp: String = "Plain"
 
               private var activeColor: Int = Color.BLACK
-              private var isSelfTextChange = false
+              @Volatile private var isSelfTextChange = false
               private var isPageEditorLocked = true
 
               private val original24Colors = intArrayOf(
@@ -628,13 +628,18 @@ jobs:
                           }
 
                           isSelfTextChange = true
-                          editable.setSpan(
-                              ForegroundColorSpan(activeColor),
-                              startPos,
-                              startPos + countAdded,
-                              Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                          )
-                          isSelfTextChange = false
+                          try {
+                              editable.setSpan(
+                                  ForegroundColorSpan(activeColor),
+                                  startPos,
+                                  startPos + countAdded,
+                                  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                              )
+                          } catch (e: Exception) {
+                              e.printStackTrace()
+                          } finally {
+                              isSelfTextChange = false
+                          }
                       }
                   })
 
@@ -1536,20 +1541,168 @@ jobs:
                   noticeListLayout.addView(card)
               }
 
+              // 3D Custom Option Dialog
               private fun showOptionMenu(item: ItemModel) {
-                  val lockOption = if (item.isLocked) "🔓 Remove Password" else "🔐 Add Password"
-                  val options = arrayOf("✏ Rename", lockOption, "🗑 Delete")
+                  val dialog = Dialog(this)
+                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-                  AlertDialog.Builder(this)
-                      .setTitle(item.title)
-                      .setItems(options) { _, which ->
-                          when (which) {
-                              0 -> renameItem(item)
-                              1 -> toggleItemLock(item)
-                              2 -> deleteItem(item)
-                          }
+                  val dialogCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 20f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 35f
+                          setStroke(4, Color.parseColor("#CBD5E0"))
                       }
-                      .show()
+                      layoutParams = ViewGroup.LayoutParams(850, -2)
+                  }
+
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(35, 30, 35, 30)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val headerIcon = TextView(this).apply {
+                      text = if (item.isFolder) "📁 " else "📄 "
+                      textSize = 26f
+                  }
+
+                  val title = TextView(this).apply {
+                      text = item.title
+                      textSize = 20f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
+                  }
+
+                  header.addView(headerIcon)
+                  header.addView(title)
+
+                  val body = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(30, 35, 30, 20)
+                  }
+
+                  // Rename Row
+                  val renameRow = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(25, 25, 25, 25)
+                      elevation = 6f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#F8F9FA"))
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#E2E8F0"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 20) }
+                      setOnClickListener {
+                          dialog.dismiss()
+                          renameItem(item)
+                      }
+                  }
+                  val renameIcon = TextView(this).apply { text = "✏ "; textSize = 22f; setPadding(10, 0, 20, 0) }
+                  val renameText = TextView(this).apply {
+                      text = "Rename"
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1A202C"))
+                  }
+                  renameRow.addView(renameIcon)
+                  renameRow.addView(renameText)
+
+                  // Password Lock Row
+                  val lockRow = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(25, 25, 25, 25)
+                      elevation = 6f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#F8F9FA"))
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#E2E8F0"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 20) }
+                      setOnClickListener {
+                          dialog.dismiss()
+                          toggleItemLock(item)
+                      }
+                  }
+                  val lockIcon = TextView(this).apply {
+                      text = if (item.isLocked) "🔓 " else "🔐 "
+                      textSize = 22f
+                      setPadding(10, 0, 20, 0)
+                  }
+                  val lockText = TextView(this).apply {
+                      text = if (item.isLocked) "Remove Password" else "Add Password"
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#1A202C"))
+                  }
+                  lockRow.addView(lockIcon)
+                  lockRow.addView(lockText)
+
+                  // Delete Row
+                  val deleteRow = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(25, 25, 25, 25)
+                      elevation = 6f
+                      background = GradientDrawable().apply {
+                          setColor(Color.parseColor("#FFF5F5"))
+                          cornerRadius = 25f
+                          setStroke(2, Color.parseColor("#FEB2B2"))
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-1, -2).apply { setMargins(0, 0, 0, 20) }
+                      setOnClickListener {
+                          dialog.dismiss()
+                          deleteItem(item)
+                      }
+                  }
+                  val deleteIcon = TextView(this).apply { text = "🗑 "; textSize = 22f; setPadding(10, 0, 20, 0) }
+                  val deleteText = TextView(this).apply {
+                      text = "Delete"
+                      textSize = 16f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#E53E3E"))
+                  }
+                  deleteRow.addView(deleteIcon)
+                  deleteRow.addView(deleteText)
+
+                  val footer = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 0, 30, 25)
+                  }
+
+                  val cancelBtn = TextView(this).apply {
+                      text = "CANCEL"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#2D3748"))
+                      setPadding(30, 15, 30, 15)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  footer.addView(cancelBtn)
+
+                  body.addView(renameRow)
+                  body.addView(lockRow)
+                  body.addView(deleteRow)
+
+                  dialogCard.addView(header)
+                  dialogCard.addView(body)
+                  dialogCard.addView(footer)
+
+                  dialog.setContentView(dialogCard)
+                  dialog.show()
               }
 
               private fun toggleItemLock(item: ItemModel) {
@@ -1564,20 +1717,115 @@ jobs:
                   loadCurrentDirectoryItems()
               }
 
+              // 3D Custom Rename Dialog
               private fun renameItem(item: ItemModel) {
-                  val input = EditText(this).apply { setText(item.title) }
-                  AlertDialog.Builder(this)
-                      .setTitle("Rename")
-                      .setView(input)
-                      .setPositiveButton("SHOW") { _, _ ->
+                  val dialog = Dialog(this)
+                  dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+                  dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                  val dialogCard = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      elevation = 20f
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 35f
+                          setStroke(4, Color.parseColor("#CBD5E0"))
+                      }
+                      layoutParams = ViewGroup.LayoutParams(850, -2)
+                  }
+
+                  val header = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.CENTER_VERTICAL
+                      setPadding(35, 30, 35, 30)
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                      ).apply {
+                          cornerRadii = floatArrayOf(35f, 35f, 35f, 35f, 0f, 0f, 0f, 0f)
+                      }
+                  }
+
+                  val headerIcon = TextView(this).apply {
+                      text = if (item.isFolder) "📁 " else "📄 "
+                      textSize = 26f
+                  }
+
+                  val title = TextView(this).apply {
+                      text = "Rename"
+                      textSize = 20f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                  }
+
+                  header.addView(headerIcon)
+                  header.addView(title)
+
+                  val body = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      setPadding(35, 30, 35, 20)
+                  }
+
+                  val input = EditText(this).apply {
+                      setText(item.title)
+                      textSize = 16f
+                      setPadding(30, 25, 30, 25)
+                      background = GradientDrawable().apply {
+                          setColor(Color.WHITE)
+                          cornerRadius = 20f
+                          setStroke(3, Color.parseColor("#CBD5E0"))
+                      }
+                  }
+
+                  body.addView(input)
+
+                  val footer = LinearLayout(this).apply {
+                      orientation = LinearLayout.HORIZONTAL
+                      gravity = Gravity.END or Gravity.CENTER_VERTICAL
+                      setPadding(20, 10, 35, 35)
+                  }
+
+                  val cancelBtn = TextView(this).apply {
+                      text = "CANCEL"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.parseColor("#2D3748"))
+                      setPadding(30, 15, 30, 15)
+                      setOnClickListener { dialog.dismiss() }
+                  }
+
+                  val saveBtn = Button(this).apply {
+                      text = "SHOW"
+                      textSize = 15f
+                      setTypeface(null, Typeface.BOLD)
+                      setTextColor(Color.WHITE)
+                      elevation = 6f
+                      background = GradientDrawable(
+                          GradientDrawable.Orientation.TOP_BOTTOM,
+                          intArrayOf(Color.parseColor("#2D3748"), Color.parseColor("#1A202C"))
+                      ).apply {
+                          cornerRadius = 20f
+                      }
+                      layoutParams = LinearLayout.LayoutParams(-2, -2).apply { setMargins(15, 0, 0, 0) }
+                      setOnClickListener {
                           val newTitle = input.text.toString().ifEmpty { item.title }
                           val db = dbHelper.writableDatabase
                           val cv = ContentValues().apply { put("title", newTitle) }
                           db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
                           loadCurrentDirectoryItems()
+                          dialog.dismiss()
                       }
-                      .setNegativeButton("CANCEL", null)
-                      .show()
+                  }
+
+                  footer.addView(cancelBtn)
+                  footer.addView(saveBtn)
+
+                  dialogCard.addView(header)
+                  dialogCard.addView(body)
+                  dialogCard.addView(footer)
+
+                  dialog.setContentView(dialogCard)
+                  dialog.show()
               }
 
               private fun deleteItem(item: ItemModel) {
@@ -1587,7 +1835,6 @@ jobs:
                   updateMemoryUsage()
               }
 
-              // Color preservation logic for permanent HTML saving
               private fun saveCurrentNote() {
                   if (isMemoryFull()) {
                       showMemoryFullPopUp()
@@ -1660,13 +1907,16 @@ jobs:
                   updateColorButtonUI()
 
                   isSelfTextChange = true
-                  if (content.isNotEmpty()) {
-                      val formattedText = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                      noteEditText.setText(formattedText)
-                  } else {
-                      noteEditText.setText("")
+                  try {
+                      if (content.isNotEmpty()) {
+                          val formattedText = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                          noteEditText.setText(formattedText)
+                      } else {
+                          noteEditText.setText("")
+                      }
+                  } finally {
+                      isSelfTextChange = false
                   }
-                  isSelfTextChange = false
 
                   isPageEditorLocked = true
                   applyEditorLockUI()
