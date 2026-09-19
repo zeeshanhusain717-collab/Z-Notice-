@@ -36,6 +36,7 @@ jobs:
           set -euo pipefail
           mkdir -p app/src/main/java/com/zeeshan/notice
           mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/res/drawable
 
           # gradle.properties
           cat > gradle.properties <<'EOF'
@@ -110,13 +111,122 @@ jobs:
           </resources>
           EOF
 
-          # AndroidManifest.xml
+          # 3D Vector Image Logo (ic_launcher.xml)
+          cat > app/src/main/res/drawable/ic_launcher.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:aapt="http://schemas.android.com/aapt"
+              android:width="512dp"
+              android:height="512dp"
+              android:viewportWidth="512"
+              android:viewportHeight="512">
+
+              <!-- Deep 3D Shadow -->
+              <path
+                  android:pathData="M 65,85 A 35,35 0 0,1 100,50 L 412,50 A 35,35 0 0,1 447,85 L 447,427 A 35,35 0 0,1 412,462 L 100,462 A 35,35 0 0,1 65,427 Z">
+                  <aapt:attr name="android:fillColor">
+                      <gradient
+                          android:type="radial"
+                          android:centerX="256"
+                          android:centerY="256"
+                          android:gradientRadius="260">
+                          <item android:offset="0.0" android:color="#90000000" />
+                          <item android:offset="1.0" android:color="#00000000" />
+                      </gradient>
+                  </aapt:attr>
+              </path>
+
+              <!-- Leather Cover Base -->
+              <path
+                  android:pathData="M 60,70 A 30,30 0 0,1 90,40 L 410,40 A 30,30 0 0,1 440,70 L 440,430 A 30,30 0 0,1 410,460 L 90,460 A 30,30 0 0,1 60,430 Z">
+                  <aapt:attr name="android:fillColor">
+                      <gradient
+                          android:type="linear"
+                          android:startX="60"
+                          android:startY="40"
+                          android:endX="440"
+                          android:endY="460">
+                          <item android:offset="0.0" android:color="#4E2A1E" />
+                          <item android:offset="0.4" android:color="#361B12" />
+                          <item android:offset="1.0" android:color="#1F0D08" />
+                      </gradient>
+                  </aapt:attr>
+              </path>
+
+              <!-- Leather Stitches -->
+              <path
+                  android:pathData="M 75,55 L 425,55 M 425,55 L 425,445 M 425,445 L 75,445 M 75,445 L 75,55"
+                  android:strokeColor="#C89662"
+                  android:strokeWidth="2"
+                  android:strokeDasharray="8,6" />
+
+              <!-- Notebook Page -->
+              <path
+                  android:pathData="M 122,70 A 15,15 0 0,1 137,55 L 390,55 A 15,15 0 0,1 405,70 L 405,420 A 15,15 0 0,1 390,435 L 137,435 A 15,15 0 0,1 122,420 Z">
+                  <aapt:attr name="android:fillColor">
+                      <gradient
+                          android:type="linear"
+                          android:startX="122"
+                          android:startY="55"
+                          android:endX="405"
+                          android:endY="435">
+                          <item android:offset="0.0" android:color="#FFFFFF" />
+                          <item android:offset="0.85" android:color="#F5F3EF" />
+                          <item android:offset="1.0" android:color="#E2DDD5" />
+                      </gradient>
+                  </aapt:attr>
+              </path>
+
+              <!-- Ruled Lines -->
+              <path android:pathData="M 145,110 L 380,110 M 145,150 L 380,150 M 145,190 L 380,190 M 145,230 L 380,230 M 145,270 L 380,270 M 145,310 L 380,310 M 145,350 L 380,350 M 145,390 L 380,390"
+                  android:strokeColor="#E0DCD5"
+                  android:strokeWidth="1.5" />
+
+              <!-- Red Margin Line -->
+              <path android:pathData="M 175,55 L 175,435"
+                  android:strokeColor="#FF8A80"
+                  android:strokeWidth="2" />
+
+              <!-- Golden 'Z' Logo -->
+              <path
+                  android:pathData="M 220,160 L 320,160 L 320,190 L 250,285 L 320,285 L 320,320 L 215,320 L 215,290 L 285,195 L 220,195 Z">
+                  <aapt:attr name="android:fillColor">
+                      <gradient
+                          android:type="linear"
+                          android:startX="215"
+                          android:startY="160"
+                          android:endX="320"
+                          android:endY="320">
+                          <item android:offset="0.0" android:color="#FFF176" />
+                          <item android:offset="0.5" android:color="#FFB300" />
+                          <item android:offset="1.0" android:color="#FF6F00" />
+                      </gradient>
+                  </aapt:attr>
+              </path>
+
+              <!-- Spiral Rings -->
+              <path android:pathData="M 85,82 C 65,82 65,103 125,103 C 125,97 85,92 85,82 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,132 C 65,132 65,153 125,153 C 125,147 85,142 85,132 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,182 C 65,182 65,203 125,203 C 125,197 85,192 85,182 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,232 C 65,232 65,253 125,253 C 125,247 85,242 85,232 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,282 C 65,282 65,303 125,303 C 125,297 85,292 85,282 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,332 C 65,332 65,353 125,353 C 125,347 85,342 85,332 Z" android:fillColor="#FFB300"/>
+              <path android:pathData="M 85,382 C 65,382 65,403 125,403 C 125,397 85,392 85,382 Z" android:fillColor="#FFB300"/>
+
+              <!-- Golden Pen -->
+              <path android:pathData="M 450,110 L 466,110 L 466,370 L 458,390 L 450,370 Z" android:fillColor="#FFB300" />
+          </vector>
+          EOF
+
+          # AndroidManifest.xml (With Icon Attached)
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <application
                   android:allowBackup="false"
                   android:label="@string/app_name"
+                  android:icon="@drawable/ic_launcher"
+                  android:roundIcon="@drawable/ic_launcher"
                   android:supportsRtl="true"
                   android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
                   <activity
@@ -155,6 +265,7 @@ jobs:
           import android.text.Html
           import android.text.InputType
           import android.text.Spannable
+          import android.text.SpannableStringBuilder
           import android.text.TextWatcher
           import android.text.style.ForegroundColorSpan
           import android.view.Gravity
@@ -166,6 +277,7 @@ jobs:
           import android.view.inputmethod.InputMethodManager
           import android.widget.*
           import androidx.appcompat.app.AppCompatActivity
+          import androidx.core.text.HtmlCompat
           import androidx.core.view.GravityCompat
           import androidx.drawerlayout.widget.DrawerLayout
           import com.google.android.material.navigation.NavigationView
@@ -297,7 +409,6 @@ jobs:
               private var isSelfTextChange = false
               private var isPageEditorLocked = true
 
-              // 24 Original Colors
               private val original24Colors = intArrayOf(
                   Color.BLACK,
                   Color.parseColor("#1C1C1C"),
@@ -325,7 +436,6 @@ jobs:
                   Color.parseColor("#4682B4")
               )
 
-              // 48 Total Colors Palette (24 Original + 24 Mixed with 50% White)
               private val color48List = ArrayList<Int>()
 
               override fun onCreate(savedInstanceState: Bundle?) {
@@ -339,14 +449,12 @@ jobs:
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
-                  // White and Chalk Theme Background (#FFFFFF / #F8F9FA)
                   mainContainer = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setBackgroundColor(Color.parseColor("#F8F9FA"))
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
-                  // Chalk Dark Header (#1F2937)
                   dashboardHeader = FrameLayout(this).apply {
                       background = GradientDrawable(
                           GradientDrawable.Orientation.TOP_BOTTOM,
@@ -636,11 +744,9 @@ jobs:
 
               private fun generate48ColorsData() {
                   color48List.clear()
-                  // First 24 Original Colors
                   for (col in original24Colors) {
                       color48List.add(col)
                   }
-                  // Next 24 Original Colors + 50% White Mixed Colors
                   for (col in original24Colors) {
                       color48List.add(mixWith50PercentWhite(col))
                   }
@@ -1411,14 +1517,14 @@ jobs:
                   }
 
                   val body = TextView(this).apply {
-                      val plainText = Html.fromHtml(item.content, Html.FROM_HTML_MODE_LEGACY).toString()
+                      val formattedContent = HtmlCompat.fromHtml(item.content, HtmlCompat.FROM_HTML_MODE_LEGACY)
                       text = if (item.isFolder) {
                           if (item.isLocked) "🔒 Protected Folder (PIN required)" else "Folder (Tap to open)"
                       } else {
                           if (item.isLocked) {
                               "🔒 Protected Page (PIN required)"
                           } else {
-                              if (plainText.length > 40) plainText.substring(0, 40) + "..." else plainText.ifEmpty { "Empty note" }
+                              if (formattedContent.length > 40) formattedContent.subSequence(0, 40).toString() + "..." else formattedContent.ifEmpty { "Empty note" }
                           }
                       }
                       textSize = 13f
@@ -1482,13 +1588,15 @@ jobs:
                   updateMemoryUsage()
               }
 
+              // Color preservation logic for permanent HTML saving
               private fun saveCurrentNote() {
                   if (isMemoryFull()) {
                       showMemoryFullPopUp()
                       return
                   }
 
-                  val htmlContent = Html.toHtml(noteEditText.text, Html.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL)
+                  val spannable = noteEditText.text as? Spannable ?: SpannableStringBuilder(noteEditText.text)
+                  val htmlContent = spannableToHtmlWithColors(spannable)
                   val title = projectTitleTv.text.toString()
 
                   val db = dbHelper.writableDatabase
@@ -1517,6 +1625,31 @@ jobs:
                   updateMemoryUsage()
               }
 
+              private fun spannableToHtmlWithColors(spannable: Spannable): String {
+                  val sb = StringBuilder()
+                  val text = spannable.toString()
+                  val spans = spannable.getSpans(0, text.length, ForegroundColorSpan::class.java)
+                  spans.sortBy { spannable.getSpanStart(it) }
+
+                  var lastIndex = 0
+                  for (span in spans) {
+                      val start = spannable.getSpanStart(span)
+                      val end = spannable.getSpanEnd(span)
+                      if (start > lastIndex) {
+                          sb.append(Html.escapeHtml(text.substring(lastIndex, start)))
+                      }
+                      val colorHex = String.format("#%06X", 0xFFFFFF and span.foregroundColor)
+                      sb.append("<font color=\"$colorHex\">")
+                      sb.append(Html.escapeHtml(text.substring(start, end)))
+                      sb.append("</font>")
+                      lastIndex = end
+                  }
+                  if (lastIndex < text.length) {
+                      sb.append(Html.escapeHtml(text.substring(lastIndex)))
+                  }
+                  return sb.toString().replace("\n", "<br/>")
+              }
+
               private fun openEditor(title: String, content: String) {
                   dashboardHeader.visibility = View.GONE
                   noticeListLayout.visibility = View.GONE
@@ -1527,11 +1660,14 @@ jobs:
                   activeColor = Color.BLACK
                   updateColorButtonUI()
 
+                  isSelfTextChange = true
                   if (content.isNotEmpty()) {
-                      noteEditText.setText(Html.fromHtml(content, Html.FROM_HTML_MODE_LEGACY))
+                      val formattedText = HtmlCompat.fromHtml(content, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                      noteEditText.setText(formattedText)
                   } else {
                       noteEditText.setText("")
                   }
+                  isSelfTextChange = false
 
                   isPageEditorLocked = true
                   applyEditorLockUI()
@@ -1592,3 +1728,4 @@ jobs:
         with:
           name: Zeeshan-Notice-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+
